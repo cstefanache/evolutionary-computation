@@ -150,18 +150,18 @@ Javascript:
 
 The Benchmark is developed with extension in mind. The framework offers an API for testing algorithms.
 
-*addPopulation(**populationSize**)* - adds a new population to the set with **populationSize** if defined, 100 otherwise
-*numPopulations()* - returns the number of individuals
-*requestIndividual()* - creates, register to the current population, prepare and return a new individual
-*removeIndividual(**individual**)* - removes provided **individual** from the current population
-*resetPopulations()* - clears populations
-*tick()* - run an evolution cycle
-*start(**numTicks**)* - start evolutionary process. If **numTicks** is provided then it will execute as many cycles as passed as parameter
-*stop()* - stops evolutionary process
-*listOperators()* - [JS] lists known operators 
-*describeOperator(**name**)* - [JS] describes (parameters and fields) operator found for **name**
-*createOperator(**operatorName**, **parameters**)* - [JS] used to create an instance of the **operatorName** with the provided set of **parameters**
-*addOperator(**operator**, **parent**)* - adds the **operator** to the current evolutionary algorithm. Since the operators can be grouped a **parent** can be passed. If there is no parent defined the operator will be added to the root group
+  * addPopulation(*populationSize*) - adds a new population to the set with *populationSize* if defined, 100 otherwise
+  * numPopulations() - returns the number of individuals
+  * requestIndividual() - creates, register to the current population, prepare and return a new individual
+  * removeIndividual(*individual*) - removes provided *individual* from the current population
+  * resetPopulations() - clears populations
+  * tick() - run an evolution cycle
+  * start(*numTicks*) - start evolutionary process. If *numTicks* is provided then it will execute as many cycles as passed as parameter
+  * stop() - stops evolutionary process
+  * listOperators() - [JS] lists known operators 
+  * describeOperator(*name*) - [JS] describes (parameters and fields) operator found for *name*
+  * createOperator(*operatorName*, *parameters*) - [JS] used to create an instance of the *operatorName* with the provided set of *parameters*
+  * addOperator(*operator*, *parent*) - adds the *operator* to the current evolutionary algorithm. Since the operators can be grouped a *parent* can be passed. If there is no parent defined the operator will be added to the root group
 
 
 Contributions and suggestions are welcome.
