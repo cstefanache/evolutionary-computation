@@ -1,0 +1,22 @@
+{
+  "name": "cambrian-web",
+  "version": "0.1.0",
+  "description": "Evolutionary Algorithm Optimisation Framework",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"tsc -w\" \"npm run lite\" ",
+    "lite": "lite-server"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^2.0.0",
+    "jquery": "^2.2.3",
+    "lite-server": "^2.2.0",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "systemjs": "^0.19.26",
+    "typescript": "^1.8.10",
+    "typings": "^0.7.12"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "out": "dist/bundle.js",
+    "target": "es5",
+    "sourceMap": true,
+    "module": "system",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "noImplicitAny": false
+  },
+  "buildOnSave": true,
+  "exclude": [
+    "ui",
+    "node_modules",
+    "typings/main",
+    "typings/main.d.ts"
+  ],
+  "filesGlob": [
+    "./src/**/*.ts"
+  ],
+  "atom": { "rewriteTsconfig": false }
+}
