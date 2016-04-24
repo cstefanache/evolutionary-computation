@@ -7,9 +7,9 @@ You can see it in action for optimising [Rastrigin](http://run.plnkr.co/plunks/U
 
 # Changes
 ## 24.04 
-  * added Genetic Algorithm support and operators. Example: [Schwefel](https://run.plnkr.co/Xs326rmfHEg36ua5/) optimisation using GA
+  * added Genetic Algorithm support and operators. Example: [Schwefel optimisation using GA](https://embed.plnkr.co/V7ABbK/)
   * added cache object to population in order to store volatile information
-
+  * added option to GrimReaper to allow option to generate new individual when one is removed (by default this option is true)
 
 # The Library
 
