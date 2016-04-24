@@ -5,6 +5,14 @@ For the moment the library is using for solution finding only Particle Swarm but
 
 You can see it in action for optimising [Rastrigin](http://run.plnkr.co/plunks/UhXCUz/) and [Schwefel](http://run.plnkr.co/plunks/4lEiZy/) using Particle Swarm.
 
+# Changes
+## 24.04 
+  * added Genetic Algorithm support and operators. Example: [Schwefel](https://run.plnkr.co/Xs326rmfHEg36ua5/) optimisation using GA
+  * added cache object to population in order to store volatile information
+
+
+# The Library
+
 The library is intended to be used from from both Browser or Node environments. The library is implemented using Typescript but Javascript wrappers are created (see Plunker examples).
 
 Typescript Example:
