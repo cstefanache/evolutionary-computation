@@ -20,32 +20,7 @@
 
 <script src="dist/bundle.js"></script>
 <script>
-    System.import('Application').then(function (module) {
-        window.application = new module.Application(function () {
-            application.addOperator(application.createOperator('Schwefel'));
-            application.addOperator(application.createOperator('MinRank', ['schwefel']));
-            application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
-                x: [-510, 510],
-                y: [-510, 510]
-            }]));
-            application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
-                x: [-420.98, -420.96],
-                y: [-420.98, -420.96]
-            }]));
-            application.addOperator(application.createOperator('GrimReaper', [100]));
-            application.addOperator(application.createOperator('RandomIndividualGenerator', [5, 0.2]));
-            application.addOperator(application.createOperator('TableRenderer', [4, false]));
-            application.addOperator(application.createOperator('PSOA', ['schwefel']));
-
-            application.addPopulation(10);
-            application.tick();
-            application.initializeHud();
-        })
-    }, function (err) {
-        console.log(err)
-    });
-
-
+    System.import('Application');
 </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import {JSField} from "./FieldDef";
 
 export abstract class Operator {
 
+    protected currentRunning:Population;
 
     name:string;
     numExecutions:number = 1;
@@ -29,6 +30,10 @@ export abstract class Operator {
         this.operators.push(operator);
     }
 
+    public getCurrentPopulation():Population {
+        return this.currentRunning;
+    }
+
 
 }
 
@@ -49,7 +54,7 @@ export class JSOperator extends Operator {
 
     getFieldDefinition():Array<FieldDef> {
         var arrFieldDef:Array<any>;
-        
+
         if (this.fieldsDefObj) {
             arrFieldDef = [];
             for (let fieldDef of this.fieldsDefObj) {
@@ -61,6 +66,7 @@ export class JSOperator extends Operator {
     }
 
     doExecute(individual:Individual, population:Population):void {
+        this.currentRunning = population;
         if (this.isIndividual) {
             for (let ind of population.individuals) {
                 this.execute(ind);

@@ -23,7 +23,7 @@ export class RandomIndividualGenerator extends PopulationOperator {
     execute(population:Population):void {
         for (var i = 0; i < this.num; i++) {
             if (Num.getRandomNum() < this.chance) {
-                Application.instance.requestIndividual();
+                population.requestIndividual();
             }
         }
     }

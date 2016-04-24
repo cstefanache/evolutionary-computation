@@ -9,15 +9,26 @@ import {JSOperator} from "./models/Operator";
 import {Log} from "./Log";
 import {GuiHud} from "./hud/GuiHud";
 import {FieldDef} from "./models/FieldDef";
+import {Schwefel} from "./operators/objective/Schwefel";
+import {Num} from "./Num";
+import {MinRank} from "./operators/ranking/MinRank";
+import {CanvasRenderer} from "./operators/renderers/CanvasRenderer";
+import {GrimReaper} from "./operators/misc/GrimReaper";
+import {RandomIndividualGenerator} from "./operators/misc/RandomIndividualGenerator";
+import {PSOA} from "./operators/swarm/PSOA";
+import {LinearRanking} from "./operators/ranking/LinearRanking";
+import {TableRenderer} from "./operators/renderers/TableRenderer";
+import {Roulette} from "./operators/selection/Roulette";
+import {HauptGA} from "./operators/genetic/HauptGA";
+import {PopulationSizeControl} from "./operators/misc/PopulationSizeControl";
 
 export class Application {
 
     private colors:Array<string> = ['green', 'blue', 'red', 'orange', 'black', 'teal', 'pink', 'magenta', 'fuchsia'];
 
-    static instance:Application;
 
     constructor(callback?:Function) {
-        Application.instance = this;
+        //    Application.instance = this;
 
         if (callback) {
             Promise.all(Object.keys(System.defined).map((key) => {
@@ -48,7 +59,10 @@ export class Application {
 
 
         var population:Population = new Population(populationSize || this.populationSize);
+        population.index = this.populations.length;
         population.color = this.colors[this.populations.length];
+        var that = this;
+        population.rind = function() { that.requestIndividual() };
         this.preparePopulation(this.rootOperator, population);
         this.populations.push(population);
     }
@@ -87,13 +101,8 @@ export class Application {
     public requestIndividual():Individual {
         let individual:Individual = new Individual();
         this.registerOperator(this.rootOperator, individual);
-        this.currentPopulation.individuals.push(individual);
+        this.currentPopulation.individuals.unshift(individual);
         return individual;
-    }
-
-    public removeIndividual(individual:Individual):void {
-        let individuals = this.currentPopulation.individuals;
-        individuals.splice(individuals.indexOf(individual), 1);
     }
 
 
@@ -237,7 +246,3 @@ export class Application {
 
 
 }
-
-
-
-

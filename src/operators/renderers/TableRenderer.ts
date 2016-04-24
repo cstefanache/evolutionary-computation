@@ -19,19 +19,22 @@ export class TableRenderer extends PopulationOperator {
     }
 
     execute(population:Population):void {
-        var htmlContent = '<thead><tr>';
 
-        for (var field of population.fields) {
-            htmlContent += '<th>' + field + '</th>';
+        if (population.index === 0) {
+            var htmlContent = '<thead><tr><th>&nbsp</th>';
+
+            for (var field of population.fields) {
+                htmlContent += '</th><th>' + field + '</th>';
+            }
+
+            htmlContent += "</tr></thead><tbody>";
         }
-
-        htmlContent += "</tr></thead><tbody>";
         var index = 0;
         for (var ind of population.individuals) {
             if (this.maxRows !== undefined && index++ > this.maxRows)
                 break;
 
-            htmlContent += '<tr>';
+            htmlContent += '<tr><td style="background-color:' + population.color + '">&nbsp;</td>';
             for (var field of population.fields) {
                 htmlContent += '<td>' + JSON.stringify(ind.getValue(field)) + '</td>';
             }
@@ -40,7 +43,11 @@ export class TableRenderer extends PopulationOperator {
 
         htmlContent += '</tbody>';
 
-        this.tableElement.html(htmlContent);
+        if (population.index === 0) {
+            this.tableElement.html(htmlContent);
+        } else {
+            this.tableElement.find('tbody').append(htmlContent);
+        }
 
     }
 

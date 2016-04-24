@@ -5,8 +5,9 @@ import {Population} from "./Population";
 
 export class GroupOperator extends Operator {
 
-    constructor(name) {
+    constructor(name, numExecutions:number = 1) {
         super(name);
+        this.numExecutions = numExecutions;
     }
 
     getFieldDefinition():Array<FieldDef> {

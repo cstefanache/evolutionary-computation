@@ -1,0 +1,31 @@
+//Genetic algorithm TS
+
+var application = new Application(); // Initialize population
+
+if (window) {
+    window['application'] = application; // Make them available on browser console
+    window['num'] = Num; // Also random number generator
+}
+
+
+application.addPopulation(100);  // Add a population of 30 individuals
+application.addPopulation(100);  // Add a population of 30 individuals
+
+
+application.addOperator(new Schwefel()); // Add Schwefel optimisation problem
+application.addOperator(new LinearRanking('schwefel'));
+
+application.addOperator(new CanvasRenderer('x', 'y', {x: [-510, 510], y: [-510, 510]})); // Add population renderer (zoomed out)
+application.addOperator(new CanvasRenderer('x', 'y', {x: [-420.98, -420.96], y: [-420.98, -420.96]})); // Add population renderer (zoomed in)
+application.addOperator(new TableRenderer(10));
+
+var selectionGroup = new GroupOperator("Selection Group", 50);
+application.addOperator(new Roulette('linearRanking'), selectionGroup);
+application.addOperator(new HauptGA(0.5, 0.2), selectionGroup);
+application.addOperator(selectionGroup);
+
+application.addOperator(new PopulationSizeControl(1000));
+
+application.initializeHud(); //Initialize the Mini-HUD for easier algorithm interactions (start/stop/reset)
+application.tick();
+

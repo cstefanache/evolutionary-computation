@@ -18,7 +18,7 @@ export class GrimReaper extends IndividualOperator {
     execute(individual:Individual):void {
         var age = individual.getValue("age");
         if (Num.getRandomNum() < age/this.avgAge) {
-            Application.instance.removeIndividual(individual);
+            this.getCurrentPopulation().removeIndividual(individual);
         }
     }
 

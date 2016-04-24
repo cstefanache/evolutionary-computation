@@ -39,7 +39,9 @@ export class GuiHud {
         document.head.appendChild(style);
 
         var root:HTMLElement = window.document.createElement('div');
-        root.style.position = "absolute";
+        root.style.position = "fixed";
+        root.style.backgroundColor = "rgba(0,0,0,0.2)";
+        root.style.padding = "10px";
         root.style.right = "20px";
         root.style.bottom = "20px";
 
