@@ -4,6 +4,8 @@ import {FieldDef} from "../../models/FieldDef";
 import {Num} from "../../Num";
 import {Individual} from "../../models/Individual";
 import {FieldType} from "../../models/FieldDef";
+
+@Register
 export class HauptGA extends PopulationOperator {
 
 

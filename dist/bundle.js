@@ -858,6 +858,10 @@ System.register("operators/ranking/LinearRanking", ["models/PopulationOperator",
                 LinearRanking.prototype.getFieldDefinition = function () {
                     return [new FieldDef_7.OutputField("linearRanking", 0)];
                 };
+                LinearRanking = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [String])
+                ], LinearRanking);
                 return LinearRanking;
             }(PopulationOperator_5.PopulationOperator));
             exports_17("LinearRanking", LinearRanking);
@@ -968,6 +972,10 @@ System.register("operators/selection/Roulette", ["models/PopulationOperator", "N
                 Roulette.prototype.getFieldDefinition = function () {
                     return undefined;
                 };
+                Roulette = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [String, Number])
+                ], Roulette);
                 return Roulette;
             }(PopulationOperator_7.PopulationOperator));
             exports_19("Roulette", Roulette);
@@ -1045,6 +1053,10 @@ System.register("operators/genetic/HauptGA", ["models/PopulationOperator", "Num"
                 HauptGA.prototype.hauptMutation = function (gmin, gmax) {
                     return gmin + Num_8.Num.getRandomNum() * (gmax - gmin);
                 };
+                HauptGA = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [Number, Number])
+                ], HauptGA);
                 return HauptGA;
             }(PopulationOperator_8.PopulationOperator));
             exports_20("HauptGA", HauptGA);
@@ -1079,6 +1091,10 @@ System.register("operators/misc/PopulationSizeControl", ["models/PopulationOpera
                 PopulationSizeControl.prototype.getFieldDefinition = function () {
                     return undefined;
                 };
+                PopulationSizeControl = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [Number])
+                ], PopulationSizeControl);
                 return PopulationSizeControl;
             }(PopulationOperator_9.PopulationOperator));
             exports_21("PopulationSizeControl", PopulationSizeControl);

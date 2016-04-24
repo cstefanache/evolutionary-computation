@@ -4,6 +4,8 @@ import {OutputField} from "../../models/FieldDef";
 import {Population} from "../../models/Population";
 import {Individual} from "../../models/Individual";
 import {Num} from "../../Num";
+
+@Register
 export class LinearRanking extends PopulationOperator {
 
     private fieldSort:string;

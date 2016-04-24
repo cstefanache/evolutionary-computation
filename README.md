@@ -3,7 +3,7 @@
 The application is intended to be used to test evolutionary algorithms and find NP-Hard problem solutions. 
 For the moment the library is using for solution finding only Particle Swarm but we intend to add Genetic, Memetic, Social etc. Algorithms soon.
 
-You can see it in action for optimising [Rastrigin](http://run.plnkr.co/plunks/UhXCUz/) and [Weierstrass](http://run.plnkr.co/plunks/4lEiZy/) using Particle Swarm.
+You can see it in action for optimising [Rastrigin](http://run.plnkr.co/plunks/UhXCUz/) and [Schwefel](http://run.plnkr.co/plunks/4lEiZy/) using Particle Swarm.
 
 The library is intended to be used from from both Browser or Node environments. The library is implemented using Typescript but Javascript wrappers are created (see Plunker examples).
 

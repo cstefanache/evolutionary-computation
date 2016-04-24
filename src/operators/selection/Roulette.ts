@@ -4,6 +4,7 @@ import {FieldDef} from "../../models/FieldDef";
 import {Num} from "../../Num";
 import {Individual} from "../../models/Individual";
 
+@Register
 export class Roulette extends PopulationOperator {
 
     rankField:string;

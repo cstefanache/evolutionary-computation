@@ -1,6 +1,8 @@
 import {PopulationOperator} from "../../models/PopulationOperator";
 import {Population} from "../../models/Population";
 import {FieldDef} from "../../models/FieldDef";
+
+@Register
 export class PopulationSizeControl extends PopulationOperator {
 
     maxIndividuals:number;
