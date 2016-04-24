@@ -323,6 +323,10 @@ System.register("models/GroupOperator", ["models/Operator"], function(exports_6,
                         }
                     }
                 };
+                GroupOperator = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [Object, Number])
+                ], GroupOperator);
                 return GroupOperator;
             }(Operator_1.Operator));
             exports_6("GroupOperator", GroupOperator);

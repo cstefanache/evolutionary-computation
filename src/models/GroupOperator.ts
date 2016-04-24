@@ -3,6 +3,7 @@ import {FieldDef} from "./FieldDef";
 import {Individual} from "./Individual";
 import {Population} from "./Population";
 
+@Register
 export class GroupOperator extends Operator {
 
     constructor(name, numExecutions:number = 1) {
