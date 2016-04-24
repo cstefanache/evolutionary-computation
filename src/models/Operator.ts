@@ -66,6 +66,7 @@ export class JSOperator extends Operator {
     }
 
     doExecute(individual:Individual, population:Population):void {
+
         this.currentRunning = population;
         if (this.isIndividual) {
             for (let ind of population.individuals) {

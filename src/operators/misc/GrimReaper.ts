@@ -9,17 +9,24 @@ import {Application} from "../../Application";
 export class GrimReaper extends IndividualOperator {
 
     private avgAge:number;
+    private regenerate:boolean;
 
-    constructor(avgAge?:number) {
+    constructor(avgAge?:number, regenerate:boolean = true) {
         super('GrimReaper');
         this.avgAge = avgAge || 100;
+        this.regenerate = regenerate;
     }
 
     execute(individual:Individual):void {
         var age = individual.getValue("age");
-        if (Num.getRandomNum() < age/this.avgAge) {
+        var rand = Num.getRandomNum();
+        if (rand < age/this.avgAge) {
             this.getCurrentPopulation().removeIndividual(individual);
+            if (this.regenerate)
+                this.getCurrentPopulation().requestIndividual();
         }
+
+        individual.setValue("age", age+1);
     }
 
 

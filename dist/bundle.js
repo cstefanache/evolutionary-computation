@@ -314,6 +314,7 @@ System.register("models/GroupOperator", ["models/Operator"], function(exports_6,
                     return [];
                 };
                 GroupOperator.prototype.doExecute = function (individual, population) {
+                    this.currentRunning = population;
                     if (!this.operators)
                         return;
                     for (var i = 0; i < this.numExecutions; i++) {
@@ -350,6 +351,7 @@ System.register("models/IndividualOperator", ["models/Operator"], function(expor
                     _super.apply(this, arguments);
                 }
                 IndividualOperator.prototype.doExecute = function (individual, population) {
+                    this.currentRunning = population;
                     for (var _i = 0, _a = population.individuals; _i < _a.length; _i++) {
                         var ind = _a[_i];
                         this.execute(ind);
@@ -378,6 +380,7 @@ System.register("models/PopulationOperator", ["models/Operator"], function(expor
                     _super.apply(this, arguments);
                 }
                 PopulationOperator.prototype.doExecute = function (individual, population) {
+                    this.currentRunning = population;
                     this.execute(population);
                 };
                 return PopulationOperator;
@@ -690,22 +693,28 @@ System.register("operators/misc/GrimReaper", ["models/IndividualOperator", "mode
         execute: function() {
             GrimReaper = (function (_super) {
                 __extends(GrimReaper, _super);
-                function GrimReaper(avgAge) {
+                function GrimReaper(avgAge, regenerate) {
+                    if (regenerate === void 0) { regenerate = true; }
                     _super.call(this, 'GrimReaper');
                     this.avgAge = avgAge || 100;
+                    this.regenerate = regenerate;
                 }
                 GrimReaper.prototype.execute = function (individual) {
                     var age = individual.getValue("age");
-                    if (Num_3.Num.getRandomNum() < age / this.avgAge) {
+                    var rand = Num_3.Num.getRandomNum();
+                    if (rand < age / this.avgAge) {
                         this.getCurrentPopulation().removeIndividual(individual);
+                        if (this.regenerate)
+                            this.getCurrentPopulation().requestIndividual();
                     }
+                    individual.setValue("age", age + 1);
                 };
                 GrimReaper.prototype.getFieldDefinition = function () {
                     return [new FieldDef_5.OutputField("age", 1)];
                 };
                 GrimReaper = __decorate([
                     Register, 
-                    __metadata('design:paramtypes', [Number])
+                    __metadata('design:paramtypes', [Number, Boolean])
                 ], GrimReaper);
                 return GrimReaper;
             }(IndividualOperator_2.IndividualOperator));

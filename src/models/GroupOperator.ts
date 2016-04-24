@@ -16,6 +16,7 @@ export class GroupOperator extends Operator {
     }
 
     doExecute(individual:Individual, population:Population):void {
+        this.currentRunning = population;
         if (!this.operators)
             return;
         for (var i = 0; i < this.numExecutions; i++) {
