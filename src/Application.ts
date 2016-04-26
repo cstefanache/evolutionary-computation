@@ -62,7 +62,9 @@ export class Application {
         population.index = this.populations.length;
         population.color = this.colors[this.populations.length];
         var that = this;
-        population.rind = function() { that.requestIndividual() };
+        population.rind = function () {
+            return that.requestIndividual()
+        };
         this.preparePopulation(this.rootOperator, population);
         this.populations.push(population);
     }

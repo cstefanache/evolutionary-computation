@@ -45,18 +45,32 @@ export class GuiHud {
         root.style.right = "20px";
         root.style.bottom = "20px";
 
+        var stop:HTMLElement;
+        var start:HTMLElement;
+        var tick:HTMLElement;
 
-        this.addButton(root, "Start", function () {
+
+        start = this.addButton(root, "Start", function () {
+            stop.style.display = "inline-block";
+            start.style.display = "none";
+            tick.style.display = "none";
             app.start()
         });
 
-        this.addButton(root, "Tick", function () {
+
+        stop = this.addButton(root, "Stop", function () {
+            start.style.display = "inline-block";
+            tick.style.display = "inline-block";
+            stop.style.display = "none";
+            app.stop()
+        });
+
+        tick = this.addButton(root, "Tick", function () {
             app.tick()
         });
 
-        this.addButton(root, "Stop", function () {
-            app.stop()
-        });
+
+        stop.style.display = "none";
 
         var populationNumber:HTMLInputElement = window.document.createElement('input');
         populationNumber.value = "100";

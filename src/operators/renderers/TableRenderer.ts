@@ -8,7 +8,7 @@ export class TableRenderer extends PopulationOperator {
     private tableElement:JQuery;
     private maxRows:number;
 
-    constructor(maxRows:number) {
+    constructor(maxRows?:number) {
         super("Table View");
         this.maxRows = maxRows;
         if (window) {

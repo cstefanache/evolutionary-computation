@@ -32,6 +32,11 @@ System.register("Num", [], function(exports_1, context_1) {
                     }
                     return result;
                 };
+                Num.randomInt = function (min, max) {
+                    if (min === void 0) { min = 0; }
+                    if (max === void 0) { max = 1; }
+                    return Num.getRandomNum(min, max, 0);
+                };
                 Num.roundToPrecision = function (value, precision) {
                     var pow = Math.pow(10, 6);
                     var val = Math.round(value * pow) / pow;
@@ -357,6 +362,10 @@ System.register("models/IndividualOperator", ["models/Operator"], function(expor
                         this.execute(ind);
                     }
                 };
+                IndividualOperator = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [])
+                ], IndividualOperator);
                 return IndividualOperator;
             }(Operator_2.Operator));
             exports_7("IndividualOperator", IndividualOperator);
@@ -461,15 +470,25 @@ System.register("hud/GuiHud", [], function(exports_10, context_10) {
                     root.style.padding = "10px";
                     root.style.right = "20px";
                     root.style.bottom = "20px";
-                    this.addButton(root, "Start", function () {
+                    var stop;
+                    var start;
+                    var tick;
+                    start = this.addButton(root, "Start", function () {
+                        stop.style.display = "inline-block";
+                        start.style.display = "none";
+                        tick.style.display = "none";
                         app.start();
                     });
-                    this.addButton(root, "Tick", function () {
-                        app.tick();
-                    });
-                    this.addButton(root, "Stop", function () {
+                    stop = this.addButton(root, "Stop", function () {
+                        start.style.display = "inline-block";
+                        tick.style.display = "inline-block";
+                        stop.style.display = "none";
                         app.stop();
                     });
+                    tick = this.addButton(root, "Tick", function () {
+                        app.tick();
+                    });
+                    stop.style.display = "none";
                     var populationNumber = window.document.createElement('input');
                     populationNumber.value = "100";
                     populationNumber.style.width = "50px";
@@ -1170,7 +1189,9 @@ System.register("Application", ["models/Population", "models/GroupOperator", "mo
                     population.index = this.populations.length;
                     population.color = this.colors[this.populations.length];
                     var that = this;
-                    population.rind = function () { that.requestIndividual(); };
+                    population.rind = function () {
+                        return that.requestIndividual();
+                    };
                     this.preparePopulation(this.rootOperator, population);
                     this.populations.push(population);
                 };
@@ -1357,22 +1378,264 @@ function Register(constructor) {
         func: constructor
     };
 }
-System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_24, context_24) {
+System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(exports_24, context_24) {
     "use strict";
     var __moduleName = context_24 && context_24.id;
-    var FieldDef_10, FieldDef_11, IndividualOperator_3, Num_9;
-    var Weierstrass;
+    var FieldDef_10, Num_9;
+    var StrField;
     return {
         setters:[
             function (FieldDef_10_1) {
                 FieldDef_10 = FieldDef_10_1;
-                FieldDef_11 = FieldDef_10_1;
+            },
+            function (Num_9_1) {
+                Num_9 = Num_9_1;
+            }],
+        execute: function() {
+            StrField = (function (_super) {
+                __extends(StrField, _super);
+                function StrField(name, min, max) {
+                    if (min === void 0) { min = 10; }
+                    if (max === void 0) { max = 100; }
+                    _super.call(this, name);
+                    this.min = min;
+                    this.max = max;
+                }
+                StrField.prototype.getInitialValue = function () {
+                    var text = "";
+                    for (var i = 0; i < Num_9.Num.getRandomNum(this.min, this.max); i++)
+                        text += StrField.getRandomChar();
+                    return text;
+                };
+                StrField.getRandomChar = function () {
+                    return StrField.possible.charAt(Math.floor(Math.random() * this.possible.length));
+                };
+                StrField.possible = " ;:'\"!@#$%^&*()_+-=\\|,./<>?[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                return StrField;
+            }(FieldDef_10.FieldDef));
+            exports_24("StrField", StrField);
+        }
+    }
+});
+System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/fields/StrField"], function(exports_25, context_25) {
+    "use strict";
+    var __moduleName = context_25 && context_25.id;
+    var FieldDef_11, Num_10, StrField_1;
+    var JSCodeField;
+    return {
+        setters:[
+            function (FieldDef_11_1) {
+                FieldDef_11 = FieldDef_11_1;
+            },
+            function (Num_10_1) {
+                Num_10 = Num_10_1;
+            },
+            function (StrField_1_1) {
+                StrField_1 = StrField_1_1;
+            }],
+        execute: function() {
+            JSCodeField = (function (_super) {
+                __extends(JSCodeField, _super);
+                function JSCodeField(name, min, max) {
+                    if (min === void 0) { min = 10; }
+                    if (max === void 0) { max = 100; }
+                    _super.call(this, name, "");
+                    this.keywords = ["abstract", "arguments", "boolean", "break", "byte", "case", "catch", "char", "class*", "const", "continue",
+                        "debugger", "default", "delete", "do", "double", "else", "enum*", "eval",
+                        "export*", "extends*", "false", "final", "finally", "float", "for", "function", "goto", "if", "implements", "import*",
+                        "in", "instanceof", "int", "interface", "let", "long", "native", "new", "null", "package", "private",
+                        "protected", "public", "return", "short", "static", "super*", "switch", "synchronized", "this", "throw", "throws", "transient",
+                        "true", "try", "typeof", "var", "void", "volatile", "while", "with", "yield"];
+                    this.possible = " ;:'\"!@#$%^&*()_+-=\\|,./<>?[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    this.assignment = ["+", "-", "*", "/", "%", "++", "--", "=", "=", "+=", "-=", "*=", "/=", "%="];
+                    this.min = min;
+                    this.max = max;
+                }
+                JSCodeField.prototype.getInitialValue = function () {
+                    this.blocks = Num_10.Num.getRandomNum(this.min, this.max);
+                    var result = "";
+                    while (this.blocks > 0) {
+                        result += this.getBlock();
+                    }
+                    return result;
+                };
+                JSCodeField.prototype.getBlock = function () {
+                    var value = "";
+                    this.blocks--;
+                    if (this.blocks < 0)
+                        return value;
+                    var rand = Num_10.Num.randomInt(0, 3);
+                    var str = this['case' + rand]();
+                    value += str;
+                    return value;
+                };
+                //assignment
+                JSCodeField.prototype.case0 = function () {
+                    return this.getBlock() + this.assignment[Num_10.Num.randomInt(0, this.assignment.length)] + this.getBlock();
+                };
+                //random
+                JSCodeField.prototype.case1 = function () {
+                    var num = Num_10.Num.randomInt(1, 10);
+                    var str = "";
+                    for (var i = 0; i < num; i++) {
+                        str += StrField_1.StrField.getRandomChar();
+                    }
+                    return str;
+                };
+                //data-structure
+                JSCodeField.prototype.case2 = function () {
+                    var wrapperRand = Num_10.Num.randomInt(0, 2);
+                    return wrapperRand === 0 ?
+                        '[' + this.getBlock() + ']' :
+                        wrapperRand === 1 ?
+                            '{' + this.getBlock() + '}' :
+                            wrapperRand === 2 ?
+                                '(' + this.getBlock() + ')' :
+                                '"' + this.getBlock() + '"';
+                };
+                //data-structure
+                JSCodeField.prototype.case3 = function () {
+                    return " " + this.keywords[Num_10.Num.randomInt(0, this.keywords.length - 1)] + " ";
+                };
+                return JSCodeField;
+            }(FieldDef_11.FieldDef));
+            exports_25("JSCodeField", JSCodeField);
+        }
+    }
+});
+System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", "models/PopulationOperator", "models/fields/JSCodeField"], function(exports_26, context_26) {
+    "use strict";
+    var __moduleName = context_26 && context_26.id;
+    var StrField_2, Num_11, PopulationOperator_10, JSCodeField_1;
+    var StringGA;
+    return {
+        setters:[
+            function (StrField_2_1) {
+                StrField_2 = StrField_2_1;
+            },
+            function (Num_11_1) {
+                Num_11 = Num_11_1;
+            },
+            function (PopulationOperator_10_1) {
+                PopulationOperator_10 = PopulationOperator_10_1;
+            },
+            function (JSCodeField_1_1) {
+                JSCodeField_1 = JSCodeField_1_1;
+            }],
+        execute: function() {
+            StringGA = (function (_super) {
+                __extends(StringGA, _super);
+                function StringGA(field, crossoverChance, mutationChance) {
+                    if (crossoverChance === void 0) { crossoverChance = 0.2; }
+                    if (mutationChance === void 0) { mutationChance = 0.5; }
+                    _super.call(this, 'StringGA');
+                    this.field = field;
+                    this.crossoverChance = crossoverChance;
+                    this.mutationChance = mutationChance;
+                }
+                StringGA.prototype.execute = function (population) {
+                    var selection = population.cache['selection'];
+                    var parent1 = selection[0];
+                    var parent2 = selection[1];
+                    var valueParent1 = parent1.getValue(this.field);
+                    var valueParent2 = parent2.getValue(this.field);
+                    if (valueParent1 === valueParent2)
+                        return;
+                    var crossoverPoint = Num_11.Num.getRandomNum(0, Math.min(valueParent1.length, valueParent2.length), 0);
+                    var crossoverValue1 = "";
+                    var crossoverValue2 = "";
+                    var oneToOne = true;
+                    for (var i = 0; i < Math.max(valueParent1.length, valueParent2.length); i++) {
+                        if (i < valueParent1.length && i < valueParent2.length && Num_11.Num.getRandomNum() < this.crossoverChance)
+                            oneToOne = !oneToOne;
+                        var vp1 = valueParent1.length <= i ? '' : valueParent1[i];
+                        var vp2 = valueParent2.length <= i ? '' : valueParent2[i];
+                        crossoverValue1 += oneToOne ? vp1 : vp2;
+                        crossoverValue2 += oneToOne ? vp2 : vp1;
+                    }
+                    //var crossoverValue1 = valueParent1.substr(0, crossoverPoint) + valueParent2.substr(crossoverPoint, valueParent2.length - crossoverPoint);
+                    //var crossoverValue2 = valueParent2.substr(0, crossoverPoint) + valueParent1.substr(crossoverPoint, valueParent1.length - crossoverPoint);
+                    crossoverValue1 = this.mutate(crossoverValue1);
+                    crossoverValue2 = this.mutate(crossoverValue2);
+                    if (crossoverValue1.trim() !== "" && crossoverValue1 != valueParent1 && crossoverValue1 != valueParent2) {
+                        var child1 = population.requestIndividual();
+                        child1.setValue(this.field, crossoverValue1);
+                    }
+                    if (crossoverValue2.trim() !== "" && crossoverValue1 != valueParent1 && crossoverValue1 != valueParent2) {
+                        var child2 = population.requestIndividual();
+                        child2.setValue(this.field, crossoverValue2);
+                    }
+                };
+                StringGA.prototype.mutate = function (str) {
+                    var result = str;
+                    if (Num_11.Num.getRandomNum() < this.mutationChance) {
+                        var res = Num_11.Num.getRandomNum(0, 7, 0);
+                        var position = Num_11.Num.getRandomNum(0, str.length, 0);
+                        var remainingLength = str.length - position;
+                        var randomLength = Num_11.Num.randomInt(0, str.length - position);
+                        switch (res) {
+                            //remove one char
+                            case (0):
+                                result = str.slice(0, position) + str.slice(position + 1);
+                                break;
+                            //add one char
+                            case (1):
+                                result = str.slice(0, position) + str.slice(position + 1);
+                                break;
+                            //prefix
+                            case (2):
+                                result = str.slice(0, position);
+                                break;
+                            //suffix
+                            case (3):
+                                result = str.slice(position);
+                                break;
+                            //within
+                            case (4):
+                                result = str.substr(position, remainingLength);
+                                break;
+                            case (5):
+                                result = str.slice(0, position) + str.slice(position + randomLength);
+                                break;
+                            case (6):
+                                result = str.slice(0, position) + StrField_2.StrField.getRandomChar() + str.slice(position);
+                                break;
+                            case (7):
+                                result = str.slice(0, position) + new JSCodeField_1.JSCodeField("test").getBlock() + str.slice(position);
+                                break;
+                        }
+                    }
+                    return result;
+                };
+                StringGA.prototype.getFieldDefinition = function () {
+                    return undefined;
+                };
+                StringGA = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [Object, Object, Object])
+                ], StringGA);
+                return StringGA;
+            }(PopulationOperator_10.PopulationOperator));
+            exports_26("StringGA", StringGA);
+        }
+    }
+});
+System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_27, context_27) {
+    "use strict";
+    var __moduleName = context_27 && context_27.id;
+    var FieldDef_12, FieldDef_13, IndividualOperator_3, Num_12;
+    var Weierstrass;
+    return {
+        setters:[
+            function (FieldDef_12_1) {
+                FieldDef_12 = FieldDef_12_1;
+                FieldDef_13 = FieldDef_12_1;
             },
             function (IndividualOperator_3_1) {
                 IndividualOperator_3 = IndividualOperator_3_1;
             },
-            function (Num_9_1) {
-                Num_9 = Num_9_1;
+            function (Num_12_1) {
+                Num_12 = Num_12_1;
             }],
         execute: function() {
             Weierstrass = (function (_super) {
@@ -1401,15 +1664,15 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                         tmp += Math.pow(this.a, k) * Math.cos(2 * Math.PI * Math.pow(this.b, k) * (y + 0.5));
                     }
                     var value = tmp - 2 * this.constant;
-                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_9.Num.roundToPrecision(value, Weierstrass.PRECISION));
+                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_12.Num.roundToPrecision(value, Weierstrass.PRECISION));
                 };
                 Weierstrass.prototype.getName = function () {
                     return "Weierstrass";
                 };
                 Weierstrass.prototype.getFieldDefinition = function () {
-                    var x = new FieldDef_11.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var y = new FieldDef_11.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var value = new FieldDef_10.OutputField(Weierstrass.OBJ_FIELD_NAME);
+                    var x = new FieldDef_13.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var y = new FieldDef_13.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var value = new FieldDef_12.OutputField(Weierstrass.OBJ_FIELD_NAME);
                     return [x, y, value];
                 };
                 Weierstrass.OBJ_FIELD_NAME = 'weierstrass';
@@ -1420,7 +1683,198 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                 ], Weierstrass);
                 return Weierstrass;
             }(IndividualOperator_3.IndividualOperator));
-            exports_24("Weierstrass", Weierstrass);
+            exports_27("Weierstrass", Weierstrass);
+        }
+    }
+});
+System.register("tests/ArrFunc", ["models/IndividualOperator", "models/fields/JSCodeField", "models/FieldDef"], function(exports_28, context_28) {
+    "use strict";
+    var __moduleName = context_28 && context_28.id;
+    var IndividualOperator_4, JSCodeField_2, FieldDef_14;
+    var ArrFunction;
+    return {
+        setters:[
+            function (IndividualOperator_4_1) {
+                IndividualOperator_4 = IndividualOperator_4_1;
+            },
+            function (JSCodeField_2_1) {
+                JSCodeField_2 = JSCodeField_2_1;
+            },
+            function (FieldDef_14_1) {
+                FieldDef_14 = FieldDef_14_1;
+            }],
+        execute: function() {
+            ArrFunction = (function (_super) {
+                __extends(ArrFunction, _super);
+                function ArrFunction() {
+                    _super.call(this, 'ArrFunction');
+                    this.keywords = ["abstract", "arguments", "boolean", "break", "byte", "case", "catch", "char", "class*", "const", "continue",
+                        "debugger", "default", "delete", "do", "double", "else", "enum*", "eval",
+                        "export*", "extends*", "false", "final", "finally", "float", "for", "function", "goto", "if", "implements", "import*",
+                        "in", "instanceof", "int", "interface", "let", "long", "native", "new", "null", "package", "private",
+                        "protected", "public", "return", "short", "static", "super*", "switch", "synchronized", "this", "throw", "throws", "transient",
+                        "true", "try", "typeof", "var", "void", "volatile", "while", "with", "yield"];
+                    this.definitions = [/\\[.*\\]/, /\(.*\)/, /{.*}/];
+                }
+                ArrFunction.prototype.getFieldDefinition = function () {
+                    return [new JSCodeField_2.JSCodeField('content', 2, 6), new FieldDef_14.OutputField('obj', -1)];
+                };
+                ArrFunction.prototype.execute = function (individual) {
+                    var obj = individual.getValue('obj');
+                    if (obj !== -1) {
+                        return;
+                    }
+                    var func = individual.getValue('content');
+                    var value = 0;
+                    try {
+                        var res = eval(func);
+                        if (!Array.isArray(res)) {
+                            value += 1e5;
+                        }
+                        else {
+                            value = 100;
+                            var last = res[0];
+                            if (_.isNumber(last) && last < 10) {
+                                value--;
+                            }
+                            for (var i = 1; i < res.length; i++) {
+                                var val = res[i];
+                                if (_.isNumber(val)) {
+                                    value -= res[i] > last ? (res[i] - last === 1 ? -4 : -2) : -1;
+                                }
+                                else {
+                                    value += 2;
+                                }
+                                last = res[i];
+                            }
+                        }
+                    }
+                    catch (err) {
+                        value += 1e6 - func.length;
+                        for (var key in this.keywords) {
+                            if (func.indexOf(key) !== -1) {
+                                value--;
+                            }
+                        }
+                        for (var i_1 = 0; i_1 < this.definitions.length; i_1++) {
+                            if (func.match(this.definitions[i_1])) {
+                                value--;
+                            }
+                        }
+                    }
+                    individual.setValue('obj', value);
+                };
+                return ArrFunction;
+            }(IndividualOperator_4.IndividualOperator));
+            exports_28("ArrFunction", ArrFunction);
+        }
+    }
+});
+///<reference path="../models/FieldDef.ts"/>
+System.register("tests/SumFunction", ["models/IndividualOperator", "models/fields/StrField", "models/FieldDef"], function(exports_29, context_29) {
+    "use strict";
+    var __moduleName = context_29 && context_29.id;
+    var IndividualOperator_5, StrField_3, FieldDef_15;
+    var SumFunction;
+    return {
+        setters:[
+            function (IndividualOperator_5_1) {
+                IndividualOperator_5 = IndividualOperator_5_1;
+            },
+            function (StrField_3_1) {
+                StrField_3 = StrField_3_1;
+            },
+            function (FieldDef_15_1) {
+                FieldDef_15 = FieldDef_15_1;
+            }],
+        execute: function() {
+            SumFunction = (function (_super) {
+                __extends(SumFunction, _super);
+                function SumFunction() {
+                    _super.call(this, 'SumFunctionOperator');
+                }
+                SumFunction.prototype.getFieldDefinition = function () {
+                    return [new StrField_3.StrField('content', 1, 10), new FieldDef_15.OutputField('obj')];
+                };
+                SumFunction.prototype.execute = function (individual) {
+                    var func = individual.getValue('content');
+                    var value = 0;
+                    var x = 3;
+                    var y = 4;
+                    var parameters = ['x', 'y'];
+                    try {
+                        //var timestamp = new Date().getTime();
+                        var result = eval(func);
+                        value = Math.abs(result - 7);
+                    }
+                    catch (err) {
+                        value += 1e3 - result.length;
+                    }
+                    for (var _i = 0, parameters_1 = parameters; _i < parameters_1.length; _i++) {
+                        var param = parameters_1[_i];
+                        if (func.indexOf(param) === -1) {
+                            value += 50;
+                        }
+                    }
+                    individual.setValue('obj', value);
+                };
+                return SumFunction;
+            }(IndividualOperator_5.IndividualOperator));
+            exports_29("SumFunction", SumFunction);
+        }
+    }
+});
+System.register("tests/Test", ["Application", "Num", "tests/ArrFunc", "operators/ranking/LinearRanking", "operators/renderers/TableRenderer", "models/GroupOperator", "operators/selection/Roulette", "operators/genetic/StringGA", "operators/misc/PopulationSizeControl"], function(exports_30, context_30) {
+    "use strict";
+    var __moduleName = context_30 && context_30.id;
+    var Application_1, Num_13, ArrFunc_1, LinearRanking_1, TableRenderer_1, GroupOperator_2, Roulette_1, StringGA_1, PopulationSizeControl_1;
+    var application, groupOperator;
+    return {
+        setters:[
+            function (Application_1_1) {
+                Application_1 = Application_1_1;
+            },
+            function (Num_13_1) {
+                Num_13 = Num_13_1;
+            },
+            function (ArrFunc_1_1) {
+                ArrFunc_1 = ArrFunc_1_1;
+            },
+            function (LinearRanking_1_1) {
+                LinearRanking_1 = LinearRanking_1_1;
+            },
+            function (TableRenderer_1_1) {
+                TableRenderer_1 = TableRenderer_1_1;
+            },
+            function (GroupOperator_2_1) {
+                GroupOperator_2 = GroupOperator_2_1;
+            },
+            function (Roulette_1_1) {
+                Roulette_1 = Roulette_1_1;
+            },
+            function (StringGA_1_1) {
+                StringGA_1 = StringGA_1_1;
+            },
+            function (PopulationSizeControl_1_1) {
+                PopulationSizeControl_1 = PopulationSizeControl_1_1;
+            }],
+        execute: function() {
+            application = new Application_1.Application(); // Initialize population
+            if (window) {
+                window['application'] = application; // Make them available on browser console
+                window['num'] = Num_13.Num; // Also random number generator
+            }
+            application.addPopulation(500); // Add a population of 30 individuals
+            application.addOperator(new ArrFunc_1.ArrFunction()); // Add Schwefel optimisation problem
+            application.addOperator(new LinearRanking_1.LinearRanking('obj'));
+            application.addOperator(new TableRenderer_1.TableRenderer(10));
+            groupOperator = new GroupOperator_2.GroupOperator("Group Operator", 50);
+            groupOperator.addOperator(new Roulette_1.Roulette('linearRanking'));
+            groupOperator.addOperator(new StringGA_1.StringGA('content', 0.1, 0.2));
+            application.addOperator(groupOperator);
+            application.addOperator(new PopulationSizeControl_1.PopulationSizeControl(500));
+            application.initializeHud(); //Initialize the Mini-HUD for easier algorithm interactions (start/stop/reset)
+            application.tick();
         }
     }
 });

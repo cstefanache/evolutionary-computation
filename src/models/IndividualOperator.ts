@@ -2,6 +2,8 @@ import {Operator} from "./Operator";
 import {Individual} from "./Individual";
 import {Population} from "./Population";
 import {FieldDef} from "./FieldDef";
+
+@Register
 export abstract class IndividualOperator extends Operator {
 
 

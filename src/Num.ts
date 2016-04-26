@@ -12,9 +12,13 @@ export class Num {
         return result;
     }
 
+    static randomInt(min:number = 0, max:number = 1) {
+        return Num.getRandomNum(min, max, 0);
+    }
+
     static roundToPrecision(value:number, precision:number):number {
         var pow = Math.pow(10, 6);
-        var val =  Math.round(value * pow) / pow;
+        var val = Math.round(value * pow) / pow;
 
         return val;
     }
