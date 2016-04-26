@@ -11,6 +11,19 @@ You can see it in action for optimising [Rastrigin](http://run.plnkr.co/plunks/U
   * added cache object to population in order to store volatile information
   * added option to GrimReaper to allow option to generate new individual when one is removed (by default this option is true)
 
+# Having fun with the benchmark:
+
+ - for a plnkr
+ 
+ OR
+ 
+ - install NodeJS & clone/fork the repository and run:
+```
+    npm install
+    tsc -w
+```
+open index.html
+
 # The Library
 
 The library is intended to be used from from both Browser or Node environments. The library is implemented using Typescript but Javascript wrappers are created (see Plunker examples).
