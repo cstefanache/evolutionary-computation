@@ -73,6 +73,8 @@ export class Application {
         var host:Operator = parent !== undefined ? parent : this.rootOperator;
         host.addOperator(operator);
 
+        console.log(operator);
+
         for (let population of this.populations) {
             this.preparePopulation(operator, population)
         }
@@ -167,6 +169,7 @@ export class Application {
     }
 
     public newJSOperator(name:string, callback:Function, isIndividual:boolean, fieldsDef?:Array<any>) {
+       console.log(name);
         return new JSOperator(name, callback, isIndividual, fieldsDef);
     }
 

@@ -16,7 +16,8 @@
     "ui",
     "node_modules",
     "typings/main",
-    "typings/main.d.ts"
+    "typings/main.d.ts",
+    "src/tests"
   ],
   "filesGlob": [
     "./src/**/*.ts"

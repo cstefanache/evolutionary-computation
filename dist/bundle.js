@@ -1198,6 +1198,7 @@ System.register("Application", ["models/Population", "models/GroupOperator", "mo
                 Application.prototype.addOperator = function (operator, parent) {
                     var host = parent !== undefined ? parent : this.rootOperator;
                     host.addOperator(operator);
+                    console.log(operator);
                     for (var _i = 0, _a = this.populations; _i < _a.length; _i++) {
                         var population = _a[_i];
                         this.preparePopulation(operator, population);
@@ -1283,6 +1284,7 @@ System.register("Application", ["models/Population", "models/GroupOperator", "mo
                     }
                 };
                 Application.prototype.newJSOperator = function (name, callback, isIndividual, fieldsDef) {
+                    console.log(name);
                     return new Operator_4.JSOperator(name, callback, isIndividual, fieldsDef);
                 };
                 Application.prototype.listOperators = function () {
@@ -1684,197 +1686,6 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                 return Weierstrass;
             }(IndividualOperator_3.IndividualOperator));
             exports_27("Weierstrass", Weierstrass);
-        }
-    }
-});
-System.register("tests/ArrFunc", ["models/IndividualOperator", "models/fields/JSCodeField", "models/FieldDef"], function(exports_28, context_28) {
-    "use strict";
-    var __moduleName = context_28 && context_28.id;
-    var IndividualOperator_4, JSCodeField_2, FieldDef_14;
-    var ArrFunction;
-    return {
-        setters:[
-            function (IndividualOperator_4_1) {
-                IndividualOperator_4 = IndividualOperator_4_1;
-            },
-            function (JSCodeField_2_1) {
-                JSCodeField_2 = JSCodeField_2_1;
-            },
-            function (FieldDef_14_1) {
-                FieldDef_14 = FieldDef_14_1;
-            }],
-        execute: function() {
-            ArrFunction = (function (_super) {
-                __extends(ArrFunction, _super);
-                function ArrFunction() {
-                    _super.call(this, 'ArrFunction');
-                    this.keywords = ["abstract", "arguments", "boolean", "break", "byte", "case", "catch", "char", "class*", "const", "continue",
-                        "debugger", "default", "delete", "do", "double", "else", "enum*", "eval",
-                        "export*", "extends*", "false", "final", "finally", "float", "for", "function", "goto", "if", "implements", "import*",
-                        "in", "instanceof", "int", "interface", "let", "long", "native", "new", "null", "package", "private",
-                        "protected", "public", "return", "short", "static", "super*", "switch", "synchronized", "this", "throw", "throws", "transient",
-                        "true", "try", "typeof", "var", "void", "volatile", "while", "with", "yield"];
-                    this.definitions = [/\\[.*\\]/, /\(.*\)/, /{.*}/];
-                }
-                ArrFunction.prototype.getFieldDefinition = function () {
-                    return [new JSCodeField_2.JSCodeField('content', 2, 6), new FieldDef_14.OutputField('obj', -1)];
-                };
-                ArrFunction.prototype.execute = function (individual) {
-                    var obj = individual.getValue('obj');
-                    if (obj !== -1) {
-                        return;
-                    }
-                    var func = individual.getValue('content');
-                    var value = 0;
-                    try {
-                        var res = eval(func);
-                        if (!Array.isArray(res)) {
-                            value += 1e5;
-                        }
-                        else {
-                            value = 100;
-                            var last = res[0];
-                            if (_.isNumber(last) && last < 10) {
-                                value--;
-                            }
-                            for (var i = 1; i < res.length; i++) {
-                                var val = res[i];
-                                if (_.isNumber(val)) {
-                                    value -= res[i] > last ? (res[i] - last === 1 ? -4 : -2) : -1;
-                                }
-                                else {
-                                    value += 2;
-                                }
-                                last = res[i];
-                            }
-                        }
-                    }
-                    catch (err) {
-                        value += 1e6 - func.length;
-                        for (var key in this.keywords) {
-                            if (func.indexOf(key) !== -1) {
-                                value--;
-                            }
-                        }
-                        for (var i_1 = 0; i_1 < this.definitions.length; i_1++) {
-                            if (func.match(this.definitions[i_1])) {
-                                value--;
-                            }
-                        }
-                    }
-                    individual.setValue('obj', value);
-                };
-                return ArrFunction;
-            }(IndividualOperator_4.IndividualOperator));
-            exports_28("ArrFunction", ArrFunction);
-        }
-    }
-});
-///<reference path="../models/FieldDef.ts"/>
-System.register("tests/SumFunction", ["models/IndividualOperator", "models/fields/StrField", "models/FieldDef"], function(exports_29, context_29) {
-    "use strict";
-    var __moduleName = context_29 && context_29.id;
-    var IndividualOperator_5, StrField_3, FieldDef_15;
-    var SumFunction;
-    return {
-        setters:[
-            function (IndividualOperator_5_1) {
-                IndividualOperator_5 = IndividualOperator_5_1;
-            },
-            function (StrField_3_1) {
-                StrField_3 = StrField_3_1;
-            },
-            function (FieldDef_15_1) {
-                FieldDef_15 = FieldDef_15_1;
-            }],
-        execute: function() {
-            SumFunction = (function (_super) {
-                __extends(SumFunction, _super);
-                function SumFunction() {
-                    _super.call(this, 'SumFunctionOperator');
-                }
-                SumFunction.prototype.getFieldDefinition = function () {
-                    return [new StrField_3.StrField('content', 1, 10), new FieldDef_15.OutputField('obj')];
-                };
-                SumFunction.prototype.execute = function (individual) {
-                    var func = individual.getValue('content');
-                    var value = 0;
-                    var x = 3;
-                    var y = 4;
-                    var parameters = ['x', 'y'];
-                    try {
-                        //var timestamp = new Date().getTime();
-                        var result = eval(func);
-                        value = Math.abs(result - 7);
-                    }
-                    catch (err) {
-                        value += 1e3 - result.length;
-                    }
-                    for (var _i = 0, parameters_1 = parameters; _i < parameters_1.length; _i++) {
-                        var param = parameters_1[_i];
-                        if (func.indexOf(param) === -1) {
-                            value += 50;
-                        }
-                    }
-                    individual.setValue('obj', value);
-                };
-                return SumFunction;
-            }(IndividualOperator_5.IndividualOperator));
-            exports_29("SumFunction", SumFunction);
-        }
-    }
-});
-System.register("tests/Test", ["Application", "Num", "tests/ArrFunc", "operators/ranking/LinearRanking", "operators/renderers/TableRenderer", "models/GroupOperator", "operators/selection/Roulette", "operators/genetic/StringGA", "operators/misc/PopulationSizeControl"], function(exports_30, context_30) {
-    "use strict";
-    var __moduleName = context_30 && context_30.id;
-    var Application_1, Num_13, ArrFunc_1, LinearRanking_1, TableRenderer_1, GroupOperator_2, Roulette_1, StringGA_1, PopulationSizeControl_1;
-    var application, groupOperator;
-    return {
-        setters:[
-            function (Application_1_1) {
-                Application_1 = Application_1_1;
-            },
-            function (Num_13_1) {
-                Num_13 = Num_13_1;
-            },
-            function (ArrFunc_1_1) {
-                ArrFunc_1 = ArrFunc_1_1;
-            },
-            function (LinearRanking_1_1) {
-                LinearRanking_1 = LinearRanking_1_1;
-            },
-            function (TableRenderer_1_1) {
-                TableRenderer_1 = TableRenderer_1_1;
-            },
-            function (GroupOperator_2_1) {
-                GroupOperator_2 = GroupOperator_2_1;
-            },
-            function (Roulette_1_1) {
-                Roulette_1 = Roulette_1_1;
-            },
-            function (StringGA_1_1) {
-                StringGA_1 = StringGA_1_1;
-            },
-            function (PopulationSizeControl_1_1) {
-                PopulationSizeControl_1 = PopulationSizeControl_1_1;
-            }],
-        execute: function() {
-            application = new Application_1.Application(); // Initialize population
-            if (window) {
-                window['application'] = application; // Make them available on browser console
-                window['num'] = Num_13.Num; // Also random number generator
-            }
-            application.addPopulation(500); // Add a population of 30 individuals
-            application.addOperator(new ArrFunc_1.ArrFunction()); // Add Schwefel optimisation problem
-            application.addOperator(new LinearRanking_1.LinearRanking('obj'));
-            application.addOperator(new TableRenderer_1.TableRenderer(10));
-            groupOperator = new GroupOperator_2.GroupOperator("Group Operator", 50);
-            groupOperator.addOperator(new Roulette_1.Roulette('linearRanking'));
-            groupOperator.addOperator(new StringGA_1.StringGA('content', 0.1, 0.2));
-            application.addOperator(groupOperator);
-            application.addOperator(new PopulationSizeControl_1.PopulationSizeControl(500));
-            application.initializeHud(); //Initialize the Mini-HUD for easier algorithm interactions (start/stop/reset)
-            application.tick();
         }
     }
 });
