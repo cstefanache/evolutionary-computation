@@ -1,0 +1,105 @@
+<html>
+<head>
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
+
+
+</head>
+<body>
+
+<div id="main" class="container-fluid">
+    <Hud></Hud>
+</div>
+
+
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/underscore/underscore-min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="node_modules/systemjs/dist/system.src.js"></script>
+
+<script src="dist/bundle.js"></script>
+
+<div id="htmltemplate" style="display: block; border: 1px solid #808080; width: 400px; height: 300px; overflow: scroll;">
+
+    <div class="content">
+        <div>
+            <div class="icon elem">a</div>
+            <div class="elem">Col 1 Row 1</div>
+            <div class="elem">Col 2 Row 1</div>
+            <div class="elem">Col 3 Row 1</div>
+            <div class="elem">Col 4 Row 1</div>
+            <div class="elem">Col 5 Row 1</div>
+        </div>
+
+        <div>
+            <div class="icon elem">b</div>
+            <div class="elem">Col 1 Row 2</div>
+            <div class="elem">Col 2 Row 2</div>
+            <div class="elem">Col 3 Row 2</div>
+            <div class="elem">Col 4 Row 2</div>
+            <div class="elem">Col 5 Row 2</div>
+        </div>
+
+        <div>
+            <div class="icon elem">c</div>
+            <div class="elem">Col 1 Row 3</div>
+            <div class="elem">Col 2 Row 3</div>
+            <div class="elem">Col 3 Row 3</div>
+            <div class="elem">Col 4 Row 3</div>
+            <div class="elem">Col 5 Row 3</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    System.import('Application').then(function (module) {
+        var populationSize = 40;
+        window.application = new module.Application(function () {
+
+            application.resetPopulations();
+            application.addOperator(application.createOperator('CSSDescriptor', ['htmltemplate']));
+            application.addOperator(application.createOperator('Sort', ['result']));
+            application.addOperator(application.createOperator('CSSRenderer', ['htmltemplate']));
+            application.addOperator(application.createOperator('TableRenderer', [populationSize,['result','sortOrder']]));
+
+            var selectionGroupOperator = application.createOperator('GroupOperator', ["SelectionGroup", 10]);
+            application.addOperator(selectionGroupOperator);
+            application.addOperator(application.createOperator('Roulette', ["sortOrder"]), selectionGroupOperator);
+            application.addOperator(application.createOperator('CSSGAOperator', ['htmltemplate']), selectionGroupOperator);
+            application.addOperator(application.createOperator('PopulationSizeControl', [populationSize]));
+            /*
+             application.addOperator(application.createOperator('LinearRanking', ['schwefel']));
+             application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
+             x: [-510, 510],
+             y: [-510, 510]
+             }]));
+             application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
+             x: [-420.98, -420.96],
+             y: [-420.98, -420.96]
+             }]));
+             application.addOperator(application.createOperator('TableRenderer', [5]));
+
+             var selectionGroupOperator = application.createOperator('GroupOperator', ["SelectionGroup", 50]);
+             application.addOperator(selectionGroupOperator);
+             application.addOperator(
+             application.createOperator('Roulette', ['linearRanking']), selectionGroupOperator);
+             application.addOperator(
+             application.createOperator('HauptGA', [0.5, 0.2]), selectionGroupOperator);
+
+             application.addOperator(application.createOperator('PopulationSizeControl', [1000]));
+             */
+
+            application.addPopulation(populationSize);
+
+
+            application.tick();
+            application.initializeHud();
+        })
+    }, function (err) {
+        console.log(err)
+    }).catch(console.error.bind(console));
+    console.log(System);
+
+</script>
+</body>
+</html>

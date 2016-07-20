@@ -8,7 +8,7 @@ export class TableRenderer extends PopulationOperator {
     private tableElement:JQuery;
     private maxRows:number;
 
-    constructor(maxRows?:number) {
+    constructor(maxRows?:number, private cols?:Array<string>) {
         super("Table View");
         this.maxRows = maxRows;
         if (window) {
@@ -23,7 +23,7 @@ export class TableRenderer extends PopulationOperator {
         if (population.index === 0) {
             var htmlContent = '<thead><tr><th>&nbsp</th>';
 
-            for (var field of population.fields) {
+            for (var field of this.cols ? this.cols : population.fields) {
                 htmlContent += '</th><th>' + field + '</th>';
             }
 
@@ -35,7 +35,7 @@ export class TableRenderer extends PopulationOperator {
                 break;
 
             htmlContent += '<tr><td style="background-color:' + population.color + '">&nbsp;</td>';
-            for (var field of population.fields) {
+            for (var field of this.cols ? this.cols : population.fields) {
                 htmlContent += '<td>' + JSON.stringify(ind.getValue(field)) + '</td>';
             }
             htmlContent += '</tr>';

@@ -37,6 +37,9 @@ System.register("Num", [], function(exports_1, context_1) {
                     if (max === void 0) { max = 1; }
                     return Num.getRandomNum(min, max, 0);
                 };
+                Num.randomArrPicker = function (arr) {
+                    return arr[Math.round(Math.random() * (arr.length - 1))];
+                };
                 Num.roundToPrecision = function (value, precision) {
                     var pow = Math.pow(10, 6);
                     var val = Math.round(value * pow) / pow;
@@ -913,8 +916,9 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
         execute: function() {
             TableRenderer = (function (_super) {
                 __extends(TableRenderer, _super);
-                function TableRenderer(maxRows) {
+                function TableRenderer(maxRows, cols) {
                     _super.call(this, "Table View");
+                    this.cols = cols;
                     this.maxRows = maxRows;
                     if (window) {
                         this.tableElement = $('<table class="table table-striped"></table>');
@@ -924,7 +928,7 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
                 TableRenderer.prototype.execute = function (population) {
                     if (population.index === 0) {
                         var htmlContent = '<thead><tr><th>&nbsp</th>';
-                        for (var _i = 0, _a = population.fields; _i < _a.length; _i++) {
+                        for (var _i = 0, _a = this.cols ? this.cols : population.fields; _i < _a.length; _i++) {
                             var field = _a[_i];
                             htmlContent += '</th><th>' + field + '</th>';
                         }
@@ -936,7 +940,7 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
                         if (this.maxRows !== undefined && index++ > this.maxRows)
                             break;
                         htmlContent += '<tr><td style="background-color:' + population.color + '">&nbsp;</td>';
-                        for (var _d = 0, _e = population.fields; _d < _e.length; _d++) {
+                        for (var _d = 0, _e = this.cols ? this.cols : population.fields; _d < _e.length; _d++) {
                             var field = _e[_d];
                             htmlContent += '<td>' + JSON.stringify(ind.getValue(field)) + '</td>';
                         }
@@ -955,7 +959,7 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
                 };
                 TableRenderer = __decorate([
                     Register, 
-                    __metadata('design:paramtypes', [Number])
+                    __metadata('design:paramtypes', [Number, Array])
                 ], TableRenderer);
                 return TableRenderer;
             }(PopulationOperator_6.PopulationOperator));
@@ -1380,11 +1384,11 @@ function Register(constructor) {
         func: constructor
     };
 }
-System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(exports_24, context_24) {
+System.register("models/fields/CSSField", ["models/FieldDef", "Num"], function(exports_24, context_24) {
     "use strict";
     var __moduleName = context_24 && context_24.id;
     var FieldDef_10, Num_9;
-    var StrField;
+    var CSSField;
     return {
         setters:[
             function (FieldDef_10_1) {
@@ -1392,6 +1396,376 @@ System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(e
             },
             function (Num_9_1) {
                 Num_9 = Num_9_1;
+            }],
+        execute: function() {
+            /**
+             * Fetch data
+             *
+             *
+             //http://cssvalues.com/
+             var cssValues = {};
+             [].slice.call(
+             document.getElementsByTagName('section')).forEach(
+             (elem) => {
+                        var id = elem.id;
+                        var values = [];
+                        cssValues[id] = values;
+                        [].slice.call(elem.getElementsByTagName('code')).forEach((codeElem) => {
+                            console.log(codeElem);
+                            values.push(codeElem.innerText);
+                        })
+                    }
+             )
+             console.log(JSON.stringify(cssValues));
+             *
+             */
+            CSSField = (function (_super) {
+                __extends(CSSField, _super);
+                function CSSField(id, name) {
+                    _super.call(this, name);
+                    this.tags = CSSField.getTagsList(id);
+                }
+                CSSField.prototype.getInitialValue = function () {
+                    var val = [], half = this.tags.length / 2;
+                    for (var i = 0; i < half + Num_9.Num.randomInt(0, half); i++) {
+                        val.push(CSSField.buildSingleCSS(this.tags, 5, 30));
+                    }
+                    return val;
+                };
+                CSSField.getFullCSSString = function (obj) {
+                    var value = "";
+                    obj.forEach(function (def) {
+                        value += def.sel + "{";
+                        def.def.forEach(function (props) {
+                            value += props.property + ":" + props.value + ";";
+                        });
+                        value += "}";
+                    });
+                    return value;
+                };
+                CSSField.buildSingleCSS = function (selectors, minRules, maxRules) {
+                    if (minRules === void 0) { minRules = 1; }
+                    if (maxRules === void 0) { maxRules = 10; }
+                    var css = {};
+                    var selector = Num_9.Num.randomArrPicker(selectors);
+                    css.sel = selector;
+                    css.def = [];
+                    for (var i = 0; i < Math.round(Math.random() * (maxRules - minRules)) + 1; i++) {
+                        css.def.push(CSSField.getSingleCSSRule());
+                    }
+                    return css;
+                };
+                CSSField.getSingleCSSRule = function () {
+                    var keys = Object.keys(CSSField.CSSOptions);
+                    var cssRule = {};
+                    var selectedKey = Num_9.Num.randomArrPicker(keys);
+                    var tempValue = Num_9.Num.randomArrPicker(CSSField.CSSOptions[selectedKey]);
+                    cssRule.property = selectedKey;
+                    cssRule.value = CSSField.parseValue(tempValue);
+                    return cssRule;
+                };
+                CSSField.getCSSValueForProp = function (prop) {
+                    return CSSField.parseValue(prop);
+                };
+                CSSField.parseValue = function (value) {
+                    var final = "", isTag = false, lastIndex = 0;
+                    for (var i = 0; i < value.length; i++) {
+                        if (value[i] === "<" || value[i] === "[") {
+                            lastIndex = i + 1;
+                            isTag = true;
+                        }
+                        else if (value[i] === ">") {
+                            isTag = false;
+                            var tagName = value.substr(lastIndex, i - lastIndex);
+                            switch (tagName) {
+                                case "number":
+                                    final += Num_9.Num.randomInt(0, 100);
+                                    break;
+                                case "percentage":
+                                    final += Num_9.Num.randomInt(0, 100) + "%";
+                                    break;
+                                case "length":
+                                case "integer":
+                                    final += Num_9.Num.randomInt(-1028, 1028);
+                                    break;
+                                case "time":
+                                    final += Num_9.Num.roundToPrecision(Num_9.Num.getRandomNum(0, 2), 2) + "s";
+                                    break;
+                                case "currentColor":
+                                case 'color':
+                                    final += "rgba("
+                                        + Num_9.Num.randomInt(0, 255) + ","
+                                        + Num_9.Num.randomInt(0, 255) + ","
+                                        + Num_9.Num.randomInt(0, 255) + ","
+                                        + Num_9.Num.roundToPrecision(Num_9.Num.getRandomNum(0, 1), 2) + ")";
+                                    break;
+                                default:
+                                    console.log(tagName);
+                            }
+                        }
+                        else if (value[i] === "]") {
+                            isTag = false;
+                            var tagName = value.substr(lastIndex, i - lastIndex);
+                            //console.log(tagName);
+                            var parse = Num_9.Num.randomArrPicker(CSSField.CSSOptions[tagName]);
+                            //console.log(parse);
+                            final += CSSField.parseValue(parse);
+                        }
+                        else if (!isTag) {
+                            final += value[i];
+                        }
+                    }
+                    return final;
+                };
+                CSSField.getTagsList = function (id) {
+                    var tags = new Set([]);
+                    this.iterateElement(document.getElementById(id), "#" + id, tags);
+                    return Array.from(tags);
+                };
+                CSSField.iterateElement = function (element, ancestry, tags) {
+                    var _this = this;
+                    [].slice.call(element.children).forEach(function (elem) {
+                        var tagName = elem.tagName.toLowerCase();
+                        tags.add(ancestry + " " + tagName);
+                        if (elem.classList.length > 0) {
+                            [].slice.call(elem.classList).forEach(function (name) {
+                                tags.add(ancestry + " " + tagName + "." + name);
+                                tags.add(ancestry + " ." + name);
+                            });
+                        }
+                        _this.iterateElement(elem, ancestry, tags);
+                    });
+                };
+                CSSField.CSSOptions = {
+                    "all": ["initial", "unset", "inherit"],
+                    "animation": ["[animation-name] [animation-duration] [animation-timing-function] [animation-delay] [animation-iteration-count] [animation-direction] [animation-fill-mode] [animation-play-state]"],
+                    "animation-delay": ["0s", "<time>", "@keyframes"],
+                    "direction": ["ltr", "rtl"],
+                    "animation-direction": ["normal", "reverse", "alternate-reverse", "alternate", "@keyframes"],
+                    "animation-duration": ["0s", "<time>", "@keyframes"],
+                    "animation-fill-mode": ["none", "forwards", "both", "backwards"],
+                    "animation-iteration-count": ["1", "infinite", "<number>", "@keyframes"],
+                    "animation-name": ["none", "@keyframes", "@keyframes"],
+                    "animation-timing-function": ["ease", "steps(<integer>, start)", "steps(<integer>, end)", "step-start", "step-end", "linear", "ease-out", "ease-in-out", "ease-in", "cubic-bezier(<number>, <number>, <number>, <number>)", "@keyframes"],
+                    "animation-play-state": ["running", "paused", "@keyframes"],
+                    "visibility": ["visible", "hidden", "collapse"],
+                    "backface-visibility": ["visible", "hidden"],
+                    "background": ["[background-color] [background-repeat] [background-attachment] [background-position] / [background-size] [background-origin] [background-clip]", "background-size", "background-position", "background-origin", "background-clip", "background-origin", "background-origin", "background-clip"],
+                    "background-attachment": ["scroll", "local", "fixed", "background-attachment"],
+                    "background-blend-mode": ["normal", "soft-light", "screen", "saturation", "overlay", "multiply", "luminosity", "lighten", "hue", "hard-light", "exclusion", "difference", "darken", "color-dodge", "color-burn", "color"],
+                    "color": ["<color>"],
+                    "background-color": ["transparent", "<color>"],
+                    "clip": ["auto", "rect(<length>, <length>, <length>, <length>)", "inset(<length>, <length>, <length>, <length>)", "clip-path"],
+                    //"clip-path": ["none", "view-box", "stroke-box", "fill-box", "<url>", "<shape-box>", "<basic-shape>", "clip"],
+                    "background-clip": ["border-box", "padding-box", "content-box", "background-clip"],
+                    //"background-image": ["none", "url(\"path/file.png\")", "<repeating-gradient>", "<radial-gradient>", "<linear-gradient>", "<image-function>"],
+                    "background-origin": ["padding-box", "content-box", "border-box", "background-attachment"],
+                    "position": ["static", "sticky", "relative", "page", "fixed", "center", "absolute"],
+                    "background-position": ["0% 0%", "right bottom", "left top", "center center", "<percentage> <length>", "background-position"],
+                    "background-repeat": ["repeat", "space", "round", "repeat-y", "repeat-x", "repeat no-repeat", "no-repeat", "background-repeat"],
+                    "background-size": ["auto", "cover", "contain", "auto <percentage>", "<percentage> <length>", "<percentage>", "<length> auto", "<length> <percentage>", "<length>"],
+                    "order": ["0", "<integer>"],
+                    "border": ["[border-width] [border-style] [border-color]", "border-image"],
+                    "border-collapse": ["separate", "collapse"],
+                    "border-color": ["<currentColor>", "transparent", "<color>"],
+                    "top": ["auto", "<percentage>", "<length>"],
+                    "border-top": ["[border-width] [border-style] [border-color]"],
+                    "border-top-color": ["<currentColor>", "transparent", "<color>"],
+                    "right": ["auto", "<percentage>", "<length>"],
+                    "border-right": ["[border-width] [border-style] [border-color]"],
+                    "border-right-color": ["<currentColor>", "transparent", "<color>"],
+                    "bottom": ["auto", "<percentage>", "<length>"],
+                    "border-bottom": ["[border-width] [border-style] [border-color]"],
+                    "border-bottom-color": ["<currentColor>", "transparent", "<color>"],
+                    "left": ["auto", "<percentage>", "<length>"],
+                    "border-left": ["[border-width] [border-style] [border-color]"],
+                    "border-left-color": ["<currentColor>", "transparent", "<color>"],
+                    "border-radius": ["0", "<percentage>", "<length> <length> <length> <length>", "<length> / <percentage>", "<length>"],
+                    "border-top-left-radius": ["0", "<percentage>", "<length>"],
+                    "border-top-right-radius": ["0", "<percentage>", "<length>"],
+                    "border-bottom-left-radius": ["0", "<percentage>", "<length>"],
+                    "border-bottom-right-radius": ["0", "<percentage>", "<length>"],
+                    //"border-image": ["[border-image-source] [border-image-slice] / [border-image-width] [border-image-width] / [border-image-outset] [border-image-repeat]"],
+                    //"border-image-source": ["none", "url(\"path/file.png\")"],
+                    "width": ["auto", "<percentage>", "<length>"],
+                    "border-image-repeat": ["stretch", "space", "round", "repeat"],
+                    "border-spacing": ["0", "<length> <length>", "<length>"],
+                    "border-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "border-top-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "border-right-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "border-bottom-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "border-left-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "border-width": ["medium", "thin", "thick", "<length>"],
+                    "border-top-width": ["medium", "thin", "thick", "<length>"],
+                    "border-right-width": ["medium", "thin", "thick", "<length>"],
+                    "border-bottom-width": ["medium", "thin", "thick", "<length>"],
+                    "border-left-width": ["medium", "thin", "thick", "<length>"],
+                    "box-decoration-break": ["slice", "clone"],
+                    "box-shadow": ["none", "<length> <length> <length> <length> <color> inset"],
+                    "box-sizing": ["content-box", "padding-box", "border-box", "padding-box"],
+                    "break-before": ["auto", "right", "page", "left", "column", "avoid-page", "avoid-column", "avoid", "always"],
+                    "break-after": ["auto", "right", "page", "left", "column", "avoid-page", "avoid-column", "avoid", "always"],
+                    "break-inside": ["auto", "avoid-page", "avoid-column", "avoid"],
+                    "caption-side": ["top", "bottom"],
+                    "clear": ["none", "right", "left", "both"],
+                    "clear-after": ["none", "top", "start", "right", "outside", "left", "inside", "end", "descendants", "bottom", "both"],
+                    "column-fill": ["balance", "auto"],
+                    "column-span": ["none", "all"],
+                    "column-width": ["auto", "<length>"],
+                    "column-count": ["auto", "<integer>"],
+                    "column-gap": ["normal", "<length>"],
+                    "column-rule": ["[column-rule-width] [column-rule-style] [column-rule-color]"],
+                    "column-rule-color": ["<color>"],
+                    "column-rule-style": ["none", "solid", "ridge", "outset", "inset", "hidden", "groove", "double", "dotted", "dashed"],
+                    "column-rule-width": ["medium", "thin", "thick", "<length>"],
+                    "columns": ["[column-width] [column-count]"],
+                    "content": ["normal", "open-quote", "none", "no-open-quote", "no-close-quote", "icon", "close-quote", ":before", ":after"],
+                    "counter-increment": ["none", "<integer>"],
+                    "counter-reset": ["none", "<integer>"],
+                    "cursor": ["auto", "zoom-out", "zoom-in", "wait", "w-resize", "vertical-text", "url(\"path/file.png\")", "text", "sw-resize", "se-resize", "s-resize", "row-resize", "progress", "pointer", "nwse-resize", "nw-resize", "ns-resize", "not-allowed", "none", "no-drop", "nesw-resize", "ne-resize", "n-resize", "move", "help", "ew-resize", "e-resize", "default", "crosshair", "copy", "context-menu", "col-resize", "cell", "all-scroll", "alias"],
+                    "display": ["inline", "table-row-group", "table-row", "table-header-group", "table-footer-group", "table-column-group", "table-column", "table-cell", "table-caption", "table", "run-in", "run-in", "none", "list-item", "inline-table", "inline-flex", "inline-block", "flex", "container", "compact", "block"],
+                    "empty-cells": ["show", "hide"],
+                    "float": ["none", "right", "left"],
+                    "flex": ["[flex-grow] [flex-shrink] [flex-basis]", "none"],
+                    "flex-basis": ["auto", "<length>"],
+                    "flex-direction": ["row", "row-reverse", "column-reverse", "column"],
+                    "flex-flow": ["[flex-direction] [flex-wrap]"],
+                    "flex-grow": ["0", "<number>"],
+                    "flex-shrink": ["1", "<number>"],
+                    "flex-wrap": ["nowrap", "wrap-reverse", "wrap"],
+                    "align-items": ["stretch", "flex-start", "flex-end", "center", "baseline"],
+                    "align-self": ["auto", "stretch", "flex-start", "flex-end", "center", "baseline"],
+                    "align-content": ["stretch", "space-between", "space-around", "flex-start", "flex-end", "center"],
+                    "justify-content": ["flex-start", "space-between", "space-around", "flex-end", "center"],
+                    //"filter": ["none", "sepia(<number> | <percentage>)", "saturate(<number> | <percentage>)", "opacity(<number> | <percentage>)", "invert(<number> | <percentage>)", "hue-rotate(<angle>)", "grayscale(<number> | <percentage>)", "drop-shadow(<length> <color>)", "contrast(<number> | <percentage>)", "brightness(<number> | <percentage>)", "blur(<length>)", "<url>"],
+                    "font": ["[font-style] [font-variant] [font-weight] [font-stretch] [font-size] / [line-height] "],
+                    //"font-family": ["<family-name>"],
+                    //"font-feature-settings": ["normal", "<feature-tag-value>"],
+                    "font-size": ["medium", "xx-small", "xx-large", "x-small", "x-large", "smaller", "small", "larger", "large", "<percentage>", "<length>"],
+                    "font-stretch": ["normal", "ultra-expanded", "ultra-condensed", "semi-expanded", "semi-condensed", "extra-expanded", "extra-condensed", "expanded", "condensed"],
+                    "font-size-adjust": ["none", "<number>"],
+                    "font-synthesis": ["weight style", "weight", "style", "none"],
+                    "font-kerning": ["auto", "normal", "none"],
+                    "font-variant": ["normal", "unicase", "titling-caps", "small-caps", "petite-caps", "all-small-caps", "all-petite-caps"],
+                    "font-variant-caps": ["normal", "unicase", "titling-caps", "small-caps", "petite-caps", "all-small-caps", "all-petite-caps"],
+                    "font-style": ["normal", "oblique", "italic"],
+                    "font-weight": ["normal", "lighter", "bolder", "bold", "900", "800", "700", "600", "500", "400", "300", "200", "100"],
+                    "hanging-punctuation": ["none", "last force-end", "last allow-end", "last", "force-end", "first force-end", "first allow-end", "first", "allow-end"],
+                    "height": ["auto", "<percentage>", "<length>"],
+                    "hyphens": ["manual", "none", "auto"],
+                    "image-rendering": ["auto", "pixelated", "crisp-edges"],
+                    "image-resolution": ["1dppx", "snap", "from-image"],
+                    "image-orientation": ["0deg", "from-image", "<angle> flip", "<angle>"],
+                    "isolation": ["auto", "isolate"],
+                    "letter-spacing": ["normal", "<length>"],
+                    "line-break": ["auto", "strict", "normal", "loose"],
+                    "line-height": ["normal", "<percentage>", "<number>", "<length>"],
+                    "list-style": ["[list-style-type] [list-style-position]"],
+                    //"list-style-image": ["none", "<url>"],
+                    "list-style-position": ["outside", "inside"],
+                    "list-style-type": ["disc", "upper-roman", "upper-latin", "upper-alpha", "square", "none", "lower-roman", "lower-latin", "lower-greek", "lower-alpha", "georgian", "decimal-leading-zero", "decimal", "circle", "armenian"],
+                    "margin": ["[margin-top] [margin-right] [margin-bottom] [margin-left]"],
+                    "margin-left": ["0", "auto", "<percentage>", "<length>"],
+                    "margin-right": ["0", "auto", "<percentage>", "<length>"],
+                    "margin-top": ["0", "auto", "<percentage>", "<length>"],
+                    "margin-bottom": ["0", "auto", "<percentage>", "<length>"],
+                    "mask-type": ["luminance", "alpha"],
+                    "max-height": ["none", "<percentage>", "<length>"],
+                    "max-width": ["none", "<percentage>", "<length>"],
+                    "min-height": ["0", "auto", "<percentage>", "<length>"],
+                    "min-width": ["0", "auto", "<percentage>", "<length>"],
+                    "mix-blend-mode": ["normal", "soft-light", "screen", "saturation", "overlay", "multiply", "luminosity", "lighten", "hue", "hard-light", "exclusion", "difference", "darken", "color-dodge", "color-burn", "color"],
+                    "object-fit": ["fill", "scale-down", "none", "cover", "contain"],
+                    "object-position": ["50% 50%", "right bottom", "left top", "center center", "<percentage> <length>"],
+                    "opacity": ["1", "<number>"],
+                    "orphans": ["2", "<integer>"],
+                    "outline": ["[outline-color] [outline-style] [outline-width]"],
+                    "outline-color": ["invert", "<color>", "invert"],
+                    "outline-offset": ["0", "<length>"],
+                    "outline-style": ["none", "solid", "ridge", "outset", "inset", "groove", "double", "dotted", "dashed", "auto"],
+                    "outline-width": ["medium", "thin", "thick", "<length>"],
+                    "overflow": ["visible", "scroll", "hidden", "auto"],
+                    "overflow-x": ["visible", "scroll", "hidden", "auto"],
+                    "overflow-y": ["visible", "scroll", "hidden", "auto"],
+                    "overflow-wrap": ["normal", "break-word", "word-wrap"],
+                    "padding": ["[padding-top] [padding-right] [padding-bottom] [padding-left]"],
+                    "padding-top": ["0", "<percentage>", "<length>"],
+                    "padding-bottom": ["0", "<percentage>", "<length>"],
+                    "padding-left": ["0", "<percentage>", "<length>"],
+                    "padding-right": ["0", "<percentage>", "<length>"],
+                    "page-break-after": ["auto", "right", "left", "avoid", "always"],
+                    "page-break-before": ["auto", "right", "left", "avoid", "always"],
+                    "page-break-inside": ["auto", "avoid"],
+                    "perspective": ["none", "<length>"],
+                    "perspective-origin": ["50% 50%", "top", "right", "left", "center", "bottom", "<percentage>", "<length>"],
+                    "pointer-events": ["auto", "none"],
+                    //"quotes": ["none", "<string> <string>", ":before", ":after"],
+                    "resize": ["none", "vertical", "horizontal", "both"],
+                    "scroll-behavior": ["auto", "smooth"],
+                    "scroll-snap-coordinate": ["none", "right bottom", "margin-box", "left center", "border-box", "<percentage> <length>", "border-box", "margin-box"],
+                    "scroll-snap-destination": ["0px 0px", "top bottom", "left right", "center center", "<length> <percentage>"],
+                    "scroll-snap-type": ["none", "proximity", "mandatory"],
+                    "tab-size": ["8", "<length>", "<integer>"],
+                    "table-layout": ["auto", "fixed"],
+                    "text-align": ["start end", "start", "right", "match-parent", "left", "justify", "end", "center"],
+                    "text-align-last": ["auto", "start", "right", "left", "justify", "end", "center"],
+                    "text-combine-upright": ["none", "digits <integer>", "all", "-webkit-text-combine"],
+                    "text-decoration": ["[text-decoration-line] [text-decoration-style] [text-decoration-color]"],
+                    "text-decoration-color": ["<currentColor>", "<color>"],
+                    "text-decoration-line": ["none", "underline", "overline", "line-through", "blink"],
+                    "text-decoration-skip": ["none", "spaces", "objects", "ink", "edges", "box-decoration"],
+                    "text-decoration-style": ["solid", "wavy", "double", "dotted", "dashed"],
+                    "text-emphasis": ["[text-emphasis-style] [text-emphasis-color]", "text-emphasis-position"],
+                    "text-emphasis-style": ["none", "triangle", "sesame", "open", "filled", "double-circle", "dot", "circle"],
+                    "text-emphasis-color": ["<currentColor>", "<color>"],
+                    "text-emphasis-position": ["over right", "over left", "below right", "below left"],
+                    "text-indent": ["0", "<percentage>", "<length> hanging each-line", "<length> hanging", "<length> each-line", "<length>"],
+                    "text-justify": ["auto", "none", "inter-word", "distribute"],
+                    "text-orientation": ["mixed", "use-glyph-orientation", "upright", "sideways-right", "sideways-left", "sideways"],
+                    "text-overflow": ["clip", "ellipsis"],
+                    "text-rendering": ["auto", "optimizeSpeed", "optimizeLegibility", "geometricPrecision"],
+                    "text-shadow": ["none", "<length> <length> <length> <color>"],
+                    "text-underline-position": ["auto", "under right", "under left", "under", "right", "left"],
+                    "touch-action": ["auto", "pan-y", "pan-y", "pan-x", "pan-up", "pan-right", "pan-left", "pan-down", "none", "manipulation"],
+                    //"transform": ["none", "translateZ(<length>)", "translateY(<translation-value>)", "translateX(<translation-value>)", "translate3d(<translation-value>, <translation-value>, <length>)", "translate(<translation-value>, <translation-value>)", "skewY(<angle>)", "skewX(<angle>)", "scaleZ(<number>)", "scaleY(<number>)", "scaleX(<number>)", "scale3d(<number>, <number>, <number>)", "scale(<number>)", "rotateZ(<angle>)", "rotateY(<angle>)", "rotateX(<angle>)", "rotate3d(<number>, <number>, <number>, <angle>)", "rotate(<angle>)", "perspective(<length>)", "matrix3d([16 comma-separated <number> values])", "matrix([<number>, <number>, <number>, <number>, <number>, <number>])"],
+                    "transform-box": ["border-box", "view-box", "fill-box"],
+                    "transform-origin": ["50% 50%", "top", "right", "left", "center", "bottom", "<percentage>", "<length>"],
+                    "transform-style": ["flat", "preserve-3d"],
+                    "text-transform": ["none", "uppercase", "lowercase", "full-width", "capitalize", "full-width"],
+                    "transition": ["[transition-property] [transition-duration] [transition-timing-function] "],
+                    "transition-property": ["all", "none"],
+                    "transition-timing-function": ["ease", "steps(<integer>, start)", "steps(<integer>, end)", "steps(<integer>)", "step-start", "step-end", "linear", "ease-out", "ease-in-out", "ease-in", "cubic-bezier(<number>, <number>, <number>, <number>)"],
+                    "transition-duration": ["0s", "<time>"],
+                    "unicode-bidi": ["normal", "embed", "bidi-override"],
+                    "vertical-align": ["baseline", "top", "text-top", "text-bottom", "super", "sub", "middle", "bottom", "<percentage>", "<length>"],
+                    "white-space": ["normal", "pre-wrap", "pre-line", "pre", "nowrap", "pre-wrap", "pre-line"],
+                    "widows": ["2", "<integer>"],
+                    "will-change": ["auto", "scroll-position", "contents"],
+                    "word-break": ["normal", "keep-all", "break-all"],
+                    "word-spacing": ["normal", "<percentage>", "<length>"],
+                    "word-wrap": ["normal", "break-word", "overflow-wrap"],
+                    "writing-mode": ["horizontal-tb", "vertical-rl", "vertical-lr"],
+                    "z-index": ["auto", "<integer>"],
+                    "help": ["<length>", "inherit", "initial"]
+                };
+                return CSSField;
+            }(FieldDef_10.FieldDef));
+            exports_24("CSSField", CSSField);
+        }
+    }
+});
+System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(exports_25, context_25) {
+    "use strict";
+    var __moduleName = context_25 && context_25.id;
+    var FieldDef_11, Num_10;
+    var StrField;
+    return {
+        setters:[
+            function (FieldDef_11_1) {
+                FieldDef_11 = FieldDef_11_1;
+            },
+            function (Num_10_1) {
+                Num_10 = Num_10_1;
             }],
         execute: function() {
             StrField = (function (_super) {
@@ -1405,7 +1779,7 @@ System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(e
                 }
                 StrField.prototype.getInitialValue = function () {
                     var text = "";
-                    for (var i = 0; i < Num_9.Num.getRandomNum(this.min, this.max); i++)
+                    for (var i = 0; i < Num_10.Num.getRandomNum(this.min, this.max); i++)
                         text += StrField.getRandomChar();
                     return text;
                 };
@@ -1414,23 +1788,23 @@ System.register("models/fields/StrField", ["models/FieldDef", "Num"], function(e
                 };
                 StrField.possible = " ;:'\"!@#$%^&*()_+-=\\|,./<>?[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
                 return StrField;
-            }(FieldDef_10.FieldDef));
-            exports_24("StrField", StrField);
+            }(FieldDef_11.FieldDef));
+            exports_25("StrField", StrField);
         }
     }
 });
-System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/fields/StrField"], function(exports_25, context_25) {
+System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/fields/StrField"], function(exports_26, context_26) {
     "use strict";
-    var __moduleName = context_25 && context_25.id;
-    var FieldDef_11, Num_10, StrField_1;
+    var __moduleName = context_26 && context_26.id;
+    var FieldDef_12, Num_11, StrField_1;
     var JSCodeField;
     return {
         setters:[
-            function (FieldDef_11_1) {
-                FieldDef_11 = FieldDef_11_1;
+            function (FieldDef_12_1) {
+                FieldDef_12 = FieldDef_12_1;
             },
-            function (Num_10_1) {
-                Num_10 = Num_10_1;
+            function (Num_11_1) {
+                Num_11 = Num_11_1;
             },
             function (StrField_1_1) {
                 StrField_1 = StrField_1_1;
@@ -1454,7 +1828,7 @@ System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/
                     this.max = max;
                 }
                 JSCodeField.prototype.getInitialValue = function () {
-                    this.blocks = Num_10.Num.getRandomNum(this.min, this.max);
+                    this.blocks = Num_11.Num.getRandomNum(this.min, this.max);
                     var result = "";
                     while (this.blocks > 0) {
                         result += this.getBlock();
@@ -1466,18 +1840,18 @@ System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/
                     this.blocks--;
                     if (this.blocks < 0)
                         return value;
-                    var rand = Num_10.Num.randomInt(0, 3);
+                    var rand = Num_11.Num.randomInt(0, 3);
                     var str = this['case' + rand]();
                     value += str;
                     return value;
                 };
                 //assignment
                 JSCodeField.prototype.case0 = function () {
-                    return this.getBlock() + this.assignment[Num_10.Num.randomInt(0, this.assignment.length)] + this.getBlock();
+                    return this.getBlock() + this.assignment[Num_11.Num.randomInt(0, this.assignment.length)] + this.getBlock();
                 };
                 //random
                 JSCodeField.prototype.case1 = function () {
-                    var num = Num_10.Num.randomInt(1, 10);
+                    var num = Num_11.Num.randomInt(1, 10);
                     var str = "";
                     for (var i = 0; i < num; i++) {
                         str += StrField_1.StrField.getRandomChar();
@@ -1486,7 +1860,7 @@ System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/
                 };
                 //data-structure
                 JSCodeField.prototype.case2 = function () {
-                    var wrapperRand = Num_10.Num.randomInt(0, 2);
+                    var wrapperRand = Num_11.Num.randomInt(0, 2);
                     return wrapperRand === 0 ?
                         '[' + this.getBlock() + ']' :
                         wrapperRand === 1 ?
@@ -1497,29 +1871,289 @@ System.register("models/fields/JSCodeField", ["models/FieldDef", "Num", "models/
                 };
                 //data-structure
                 JSCodeField.prototype.case3 = function () {
-                    return " " + this.keywords[Num_10.Num.randomInt(0, this.keywords.length - 1)] + " ";
+                    return " " + this.keywords[Num_11.Num.randomInt(0, this.keywords.length - 1)] + " ";
                 };
                 return JSCodeField;
-            }(FieldDef_11.FieldDef));
-            exports_25("JSCodeField", JSCodeField);
+            }(FieldDef_12.FieldDef));
+            exports_26("JSCodeField", JSCodeField);
         }
     }
 });
-System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", "models/PopulationOperator", "models/fields/JSCodeField"], function(exports_26, context_26) {
+System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "models/FieldDef", "models/fields/CSSField"], function(exports_27, context_27) {
     "use strict";
-    var __moduleName = context_26 && context_26.id;
-    var StrField_2, Num_11, PopulationOperator_10, JSCodeField_1;
+    var __moduleName = context_27 && context_27.id;
+    var IndividualOperator_3, FieldDef_13, CSSField_1;
+    var CSSDescriptor;
+    return {
+        setters:[
+            function (IndividualOperator_3_1) {
+                IndividualOperator_3 = IndividualOperator_3_1;
+            },
+            function (FieldDef_13_1) {
+                FieldDef_13 = FieldDef_13_1;
+            },
+            function (CSSField_1_1) {
+                CSSField_1 = CSSField_1_1;
+            }],
+        execute: function() {
+            CSSDescriptor = (function (_super) {
+                __extends(CSSDescriptor, _super);
+                function CSSDescriptor(id) {
+                    _super.call(this, 'CSSDescriptor');
+                    this.elementId = id;
+                    this.styleElement = document.createElement('style');
+                    this.styleElement.id = "cssstyle";
+                    document.getElementsByTagName('head')[0].appendChild(this.styleElement);
+                    this.htmlElement = document.getElementById(id);
+                }
+                CSSDescriptor.prototype.execute = function (ind) {
+                    var _this = this;
+                    if (ind.getValue('result') === undefined) {
+                        var val = CSSField_1.CSSField.getFullCSSString(ind.getValue('css'));
+                        this.styleElement.innerHTML = val;
+                        var value = 0;
+                        value += this.alignment(document, '.content > div', true);
+                        value += this.noOffset(document, '.content > div');
+                        value += this.fitInsideParent(document.getElementsByClassName('content')[0]);
+                        [].slice.call(document.querySelectorAll('.content > div')).forEach(function (elem) {
+                            value += _this.alignment(elem, '.elem', false, 10);
+                        });
+                        value += 1 - 1 / val.length;
+                        ind.setValue("result", value);
+                    }
+                };
+                CSSDescriptor.prototype.noOffset = function (root, query, increment) {
+                    if (increment === void 0) { increment = 5; }
+                    var value = 0;
+                    [].slice.call(root.querySelectorAll(query)).forEach(function (elem) {
+                        value += Math.abs(elem.offsetLeft);
+                    });
+                    return value;
+                };
+                CSSDescriptor.prototype.fitInsideParent = function (element) {
+                    var value = 0;
+                    var parent = element.parentElement, width = parent.offsetWidth, height = parent.offsetHeight, actualWidth = element.offsetWidth + element.offsetLeft, actualHeight = element.offsetHeight + element.offsetTop;
+                    value += actualWidth > width ? actualWidth - width : 0;
+                    value += actualHeight > height ? actualHeight - height : 0;
+                    return value;
+                };
+                CSSDescriptor.prototype.alignment = function (root, query, leftAlignment, increment) {
+                    if (increment === void 0) { increment = 5; }
+                    var value = 0;
+                    var lastX = -1;
+                    var lastY = -1;
+                    [].slice.call(root.querySelectorAll(query)).forEach(function (elem) {
+                        var clientRect = elem.getBoundingClientRect();
+                        if (lastX == -1 && lastY == -1) {
+                        }
+                        else if (leftAlignment && (lastX !== clientRect.left || lastY === clientRect.top)) {
+                            value += increment;
+                        }
+                        else if (!leftAlignment && (lastX === clientRect.left || lastY !== clientRect.top)) {
+                            value += increment;
+                        }
+                        lastX = clientRect.left;
+                        lastY = clientRect.top;
+                    });
+                    return value;
+                };
+                CSSDescriptor.prototype.getFieldDefinition = function () {
+                    var css = new CSSField_1.CSSField(this.elementId, 'css');
+                    var value = new FieldDef_13.OutputField("result");
+                    return [css, value];
+                };
+                CSSDescriptor = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [String])
+                ], CSSDescriptor);
+                return CSSDescriptor;
+            }(IndividualOperator_3.IndividualOperator));
+            exports_27("CSSDescriptor", CSSDescriptor);
+        }
+    }
+});
+System.register("operators/css/CSSGAOperator", ["models/PopulationOperator", "Num", "models/fields/CSSField"], function(exports_28, context_28) {
+    "use strict";
+    var __moduleName = context_28 && context_28.id;
+    var PopulationOperator_10, Num_12, CSSField_2;
+    var CSSGAOperator;
+    return {
+        setters:[
+            function (PopulationOperator_10_1) {
+                PopulationOperator_10 = PopulationOperator_10_1;
+            },
+            function (Num_12_1) {
+                Num_12 = Num_12_1;
+            },
+            function (CSSField_2_1) {
+                CSSField_2 = CSSField_2_1;
+            }],
+        execute: function() {
+            CSSGAOperator = (function (_super) {
+                __extends(CSSGAOperator, _super);
+                function CSSGAOperator(id, ruleAditionProbability, ruleRemovalProbability, propertyAlterProbability, propertyAditionProbability, propertyRemovalProbability) {
+                    if (ruleAditionProbability === void 0) { ruleAditionProbability = 0.02; }
+                    if (ruleRemovalProbability === void 0) { ruleRemovalProbability = 0.04; }
+                    if (propertyAlterProbability === void 0) { propertyAlterProbability = 0.2; }
+                    if (propertyAditionProbability === void 0) { propertyAditionProbability = 0.2; }
+                    if (propertyRemovalProbability === void 0) { propertyRemovalProbability = 0.2; }
+                    _super.call(this, 'CSSGAOperator');
+                    this.ruleAditionProbability = ruleAditionProbability;
+                    this.ruleRemovalProbability = ruleRemovalProbability;
+                    this.propertyAlterProbability = propertyAlterProbability;
+                    this.propertyAditionProbability = propertyAditionProbability;
+                    this.propertyRemovalProbability = propertyRemovalProbability;
+                    this.tags = CSSField_2.CSSField.getTagsList(id);
+                }
+                CSSGAOperator.prototype.execute = function (population) {
+                    var selection = population.cache['selection'];
+                    var child1 = population.requestIndividual();
+                    var child2 = population.requestIndividual();
+                    var parent1 = selection[0];
+                    var parent2 = selection[1];
+                    var parent1CSSObject = parent1.getValue('css');
+                    var parent2CSSObject = parent2.getValue('css');
+                    var location = Num_12.Num.randomInt(1, Math.min(parent1CSSObject.length, parent2CSSObject.length) - 1);
+                    if (location > 0) {
+                        var end1 = parent1CSSObject.splice(location);
+                        var end2 = parent2CSSObject.splice(location);
+                        parent1CSSObject.concat(end2);
+                        parent2CSSObject.concat(end1);
+                    }
+                    //console.log(CSSField.getFullCSSString(parent1CSSObject));
+                    this.mutate(parent1CSSObject);
+                    //console.log(CSSField.getFullCSSString(parent1CSSObject));
+                    child1.setValue('css', parent1CSSObject);
+                    child2.setValue('css', parent2CSSObject);
+                    //console.log(parent1.getValue('css'));
+                    //console.log(child1.getValue('css'));
+                    //console.log("------");
+                };
+                CSSGAOperator.prototype.mutate = function (properties) {
+                    if (Num_12.Num.getRandomNum() < this.ruleAditionProbability) {
+                        properties.push(CSSField_2.CSSField.buildSingleCSS(this.tags));
+                    }
+                    else {
+                        var selectedRule = Num_12.Num.randomInt(0, properties.length - 1);
+                        if (Num_12.Num.getRandomNum() < this.ruleRemovalProbability && properties.length > 1) {
+                            properties.splice(selectedRule, 1);
+                        }
+                        else {
+                            try {
+                                var defs = properties[selectedRule].def;
+                                var selectedProp = Num_12.Num.randomInt(0, defs.length - 1);
+                                if (Num_12.Num.getRandomNum() < this.propertyAlterProbability) {
+                                    defs[selectedProp].value = CSSField_2.CSSField.getCSSValueForProp(defs[selectedProp].property);
+                                }
+                                else if (Num_12.Num.getRandomNum() < this.propertyAditionProbability) {
+                                    defs.push(CSSField_2.CSSField.getSingleCSSRule());
+                                }
+                                else if (Num_12.Num.getRandomNum() < this.propertyRemovalProbability) {
+                                    defs.splice(selectedProp, 1);
+                                }
+                            }
+                            catch (e) {
+                                console.log(defs, selectedRule, selectedProp);
+                            }
+                        }
+                    }
+                };
+                CSSGAOperator.prototype.getCSSString = function (arr) {
+                    var val = "";
+                    arr.forEach(function (obj) {
+                        val += obj.def + "{" + obj.val.join(";") + "}";
+                    });
+                    return val;
+                };
+                CSSGAOperator.prototype.getCSSArray = function (cssString) {
+                    var cssObject = [];
+                    var m;
+                    var re = /(.*?){(.*?)}/gm;
+                    while ((m = re.exec(cssString)) !== null) {
+                        if (m.index === re.lastIndex) {
+                            re.lastIndex++;
+                        }
+                        cssObject.push({ def: m[1].trim(), val: m[2].trim().split(";") });
+                    }
+                    return cssObject;
+                };
+                CSSGAOperator.prototype.getFieldDefinition = function () {
+                    return undefined;
+                };
+                CSSGAOperator.prototype.hauptCrossover = function (value1, value2) {
+                    if (_.isNumber(value1) && _.isNumber(value1)) {
+                        var beta = Num_12.Num.getRandomNum();
+                        return [beta * value1 + (1 - beta) * value2, (1 - beta) * value1 + beta * value2];
+                    }
+                    else {
+                        return [value1, value2];
+                    }
+                };
+                CSSGAOperator.prototype.hauptMutation = function (gmin, gmax) {
+                    return gmin + Num_12.Num.getRandomNum() * (gmax - gmin);
+                };
+                CSSGAOperator = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [String, Number, Number, Number, Number, Number])
+                ], CSSGAOperator);
+                return CSSGAOperator;
+            }(PopulationOperator_10.PopulationOperator));
+            exports_28("CSSGAOperator", CSSGAOperator);
+        }
+    }
+});
+System.register("operators/css/CSSRenderer", ["models/PopulationOperator", "models/fields/CSSField"], function(exports_29, context_29) {
+    "use strict";
+    var __moduleName = context_29 && context_29.id;
+    var PopulationOperator_11, CSSField_3;
+    var CSSRenderer;
+    return {
+        setters:[
+            function (PopulationOperator_11_1) {
+                PopulationOperator_11 = PopulationOperator_11_1;
+            },
+            function (CSSField_3_1) {
+                CSSField_3 = CSSField_3_1;
+            }],
+        execute: function() {
+            CSSRenderer = (function (_super) {
+                __extends(CSSRenderer, _super);
+                function CSSRenderer() {
+                    _super.call(this, 'CSSDescriptor');
+                    this.styleElement = document.getElementById('cssstyle');
+                }
+                CSSRenderer.prototype.execute = function (pop) {
+                    var ind = pop.individuals[0];
+                    this.styleElement.innerHTML = CSSField_3.CSSField.getFullCSSString(ind.getValue('css'));
+                };
+                CSSRenderer.prototype.getFieldDefinition = function () {
+                    return undefined;
+                };
+                CSSRenderer = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [])
+                ], CSSRenderer);
+                return CSSRenderer;
+            }(PopulationOperator_11.PopulationOperator));
+            exports_29("CSSRenderer", CSSRenderer);
+        }
+    }
+});
+System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", "models/PopulationOperator", "models/fields/JSCodeField"], function(exports_30, context_30) {
+    "use strict";
+    var __moduleName = context_30 && context_30.id;
+    var StrField_2, Num_13, PopulationOperator_12, JSCodeField_1;
     var StringGA;
     return {
         setters:[
             function (StrField_2_1) {
                 StrField_2 = StrField_2_1;
             },
-            function (Num_11_1) {
-                Num_11 = Num_11_1;
+            function (Num_13_1) {
+                Num_13 = Num_13_1;
             },
-            function (PopulationOperator_10_1) {
-                PopulationOperator_10 = PopulationOperator_10_1;
+            function (PopulationOperator_12_1) {
+                PopulationOperator_12 = PopulationOperator_12_1;
             },
             function (JSCodeField_1_1) {
                 JSCodeField_1 = JSCodeField_1_1;
@@ -1543,12 +2177,12 @@ System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", 
                     var valueParent2 = parent2.getValue(this.field);
                     if (valueParent1 === valueParent2)
                         return;
-                    var crossoverPoint = Num_11.Num.getRandomNum(0, Math.min(valueParent1.length, valueParent2.length), 0);
+                    var crossoverPoint = Num_13.Num.getRandomNum(0, Math.min(valueParent1.length, valueParent2.length), 0);
                     var crossoverValue1 = "";
                     var crossoverValue2 = "";
                     var oneToOne = true;
                     for (var i = 0; i < Math.max(valueParent1.length, valueParent2.length); i++) {
-                        if (i < valueParent1.length && i < valueParent2.length && Num_11.Num.getRandomNum() < this.crossoverChance)
+                        if (i < valueParent1.length && i < valueParent2.length && Num_13.Num.getRandomNum() < this.crossoverChance)
                             oneToOne = !oneToOne;
                         var vp1 = valueParent1.length <= i ? '' : valueParent1[i];
                         var vp2 = valueParent2.length <= i ? '' : valueParent2[i];
@@ -1570,11 +2204,11 @@ System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", 
                 };
                 StringGA.prototype.mutate = function (str) {
                     var result = str;
-                    if (Num_11.Num.getRandomNum() < this.mutationChance) {
-                        var res = Num_11.Num.getRandomNum(0, 7, 0);
-                        var position = Num_11.Num.getRandomNum(0, str.length, 0);
+                    if (Num_13.Num.getRandomNum() < this.mutationChance) {
+                        var res = Num_13.Num.getRandomNum(0, 7, 0);
+                        var position = Num_13.Num.getRandomNum(0, str.length, 0);
                         var remainingLength = str.length - position;
-                        var randomLength = Num_11.Num.randomInt(0, str.length - position);
+                        var randomLength = Num_13.Num.randomInt(0, str.length - position);
                         switch (res) {
                             //remove one char
                             case (0):
@@ -1617,27 +2251,73 @@ System.register("operators/genetic/StringGA", ["models/fields/StrField", "Num", 
                     __metadata('design:paramtypes', [Object, Object, Object])
                 ], StringGA);
                 return StringGA;
-            }(PopulationOperator_10.PopulationOperator));
-            exports_26("StringGA", StringGA);
+            }(PopulationOperator_12.PopulationOperator));
+            exports_30("StringGA", StringGA);
         }
     }
 });
-System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_27, context_27) {
+System.register("operators/misc/Sort", ["models/FieldDef", "models/PopulationOperator"], function(exports_31, context_31) {
     "use strict";
-    var __moduleName = context_27 && context_27.id;
-    var FieldDef_12, FieldDef_13, IndividualOperator_3, Num_12;
+    var __moduleName = context_31 && context_31.id;
+    var FieldDef_14, PopulationOperator_13;
+    var Sort;
+    return {
+        setters:[
+            function (FieldDef_14_1) {
+                FieldDef_14 = FieldDef_14_1;
+            },
+            function (PopulationOperator_13_1) {
+                PopulationOperator_13 = PopulationOperator_13_1;
+            }],
+        execute: function() {
+            Sort = (function (_super) {
+                __extends(Sort, _super);
+                function Sort(field, desc) {
+                    if (desc === void 0) { desc = false; }
+                    _super.call(this, "Sort");
+                    this.field = field;
+                    this.desc = desc;
+                }
+                Sort.prototype.execute = function (population) {
+                    var _this = this;
+                    population.individuals.sort(function (a, b) {
+                        var val = a.getValue(_this.field) > b.getValue(_this.field) ? -1 : 1;
+                        return _this.desc ? val : -val;
+                    });
+                    for (var i = 0; i < population.individuals.length; i++) {
+                        population.individuals[i].setValue(Sort.FIELD, i);
+                    }
+                };
+                Sort.prototype.getFieldDefinition = function () {
+                    return [new FieldDef_14.OutputField(Sort.FIELD, 0)];
+                };
+                Sort.FIELD = "sortOrder";
+                Sort = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [String, Boolean])
+                ], Sort);
+                return Sort;
+            }(PopulationOperator_13.PopulationOperator));
+            exports_31("Sort", Sort);
+        }
+    }
+});
+System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_32, context_32) {
+    "use strict";
+    var __moduleName = context_32 && context_32.id;
+    var FieldDef_15, FieldDef_16, IndividualOperator_4, Num_14;
     var Weierstrass;
     return {
         setters:[
-            function (FieldDef_12_1) {
-                FieldDef_12 = FieldDef_12_1;
-                FieldDef_13 = FieldDef_12_1;
+            function (FieldDef_15_1) {
+                FieldDef_15 = FieldDef_15_1;
+                FieldDef_16 = FieldDef_15_1;
             },
-            function (IndividualOperator_3_1) {
-                IndividualOperator_3 = IndividualOperator_3_1;
+            function (IndividualOperator_4_1) {
+                IndividualOperator_4 = IndividualOperator_4_1;
             },
-            function (Num_12_1) {
-                Num_12 = Num_12_1;
+            function (Num_14_1) {
+                Num_14 = Num_14_1;
             }],
         execute: function() {
             Weierstrass = (function (_super) {
@@ -1666,15 +2346,15 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                         tmp += Math.pow(this.a, k) * Math.cos(2 * Math.PI * Math.pow(this.b, k) * (y + 0.5));
                     }
                     var value = tmp - 2 * this.constant;
-                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_12.Num.roundToPrecision(value, Weierstrass.PRECISION));
+                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_14.Num.roundToPrecision(value, Weierstrass.PRECISION));
                 };
                 Weierstrass.prototype.getName = function () {
                     return "Weierstrass";
                 };
                 Weierstrass.prototype.getFieldDefinition = function () {
-                    var x = new FieldDef_13.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var y = new FieldDef_13.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var value = new FieldDef_12.OutputField(Weierstrass.OBJ_FIELD_NAME);
+                    var x = new FieldDef_16.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var y = new FieldDef_16.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var value = new FieldDef_15.OutputField(Weierstrass.OBJ_FIELD_NAME);
                     return [x, y, value];
                 };
                 Weierstrass.OBJ_FIELD_NAME = 'weierstrass';
@@ -1684,8 +2364,8 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                     __metadata('design:paramtypes', [])
                 ], Weierstrass);
                 return Weierstrass;
-            }(IndividualOperator_3.IndividualOperator));
-            exports_27("Weierstrass", Weierstrass);
+            }(IndividualOperator_4.IndividualOperator));
+            exports_32("Weierstrass", Weierstrass);
         }
     }
 });

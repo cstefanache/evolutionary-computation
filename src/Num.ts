@@ -16,6 +16,10 @@ export class Num {
         return Num.getRandomNum(min, max, 0);
     }
 
+    static randomArrPicker(arr:Array<any>):any {
+        return arr[Math.round(Math.random() * (arr.length - 1))];
+    }
+
     static roundToPrecision(value:number, precision:number):number {
         var pow = Math.pow(10, 6);
         var val = Math.round(value * pow) / pow;
