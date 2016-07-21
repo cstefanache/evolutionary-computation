@@ -1,0 +1,51 @@
+<html>
+<head>
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="node_modules/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
+
+
+</head>
+<body>
+
+<div id="main" class="container-fluid">
+    <Hud></Hud>
+</div>
+
+
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/underscore/underscore-min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="node_modules/systemjs/dist/system.src.js"></script>
+
+<script src="dist/bundle.js"></script>
+<script>
+    System.import('Application').then(function(module) {
+        window.application = new module.Application(function() {
+
+            application.addOperator(application.createOperator('Rastrigin'));
+            application.addOperator(application.createOperator('Sort', ['rastrigin']));
+            application.addOperator(application.createOperator('MinRank', ['rastrigin']));
+            application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
+                x: [-5.12, 5.12],
+                y: [-5.12, 5.12]
+            }]));
+
+            application.addOperator(application.createOperator('CanvasRenderer', ['x', 'y', {
+                x: [-0.012, 0.012],
+                y: [-0.012, 0.012]
+            }]));
+
+            application.addOperator(application.createOperator('TableRenderer', [5, ['x','y','rastrigin']]));
+            application.addOperator(application.createOperator('PSOA', ['rastrigin', 0.085, 0.04, 0.04]));
+            application.addOperator(application.createOperator('PopulationSizeControl', [100]));
+            application.addPopulation(100);
+            application.initializeHud();
+        })
+    }, function(err) {
+        console.log(err)
+    }).catch(console.error.bind(console));
+    console.log(System);
+
+</script>
+</body>
+</html>

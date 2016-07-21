@@ -10,14 +10,14 @@ import {Num} from "../../Num";
  [].slice.call(
  document.getElementsByTagName('section')).forEach(
  (elem) => {
-            var id = elem.id;
-            var values = [];
-            cssValues[id] = values;
-            [].slice.call(elem.getElementsByTagName('code')).forEach((codeElem) => {
-                console.log(codeElem);
-                values.push(codeElem.innerText);
-            })
-        }
+        var id = elem.id;
+        var values = [];
+        cssValues[id] = values;
+        [].slice.call(elem.getElementsByTagName('code')).forEach((codeElem) => {
+            console.log(codeElem);
+            values.push(codeElem.innerText);
+        })
+    }
  )
  console.log(JSON.stringify(cssValues));
  *

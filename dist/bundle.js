@@ -806,16 +806,22 @@ System.register("operators/swarm/PSOA", ["models/PopulationOperator", "models/Fi
         execute: function() {
             PSOA = (function (_super) {
                 __extends(PSOA, _super);
-                function PSOA(fitness) {
+                function PSOA(fitness, omega, c1, c2) {
+                    if (omega === void 0) { omega = 0.85; }
+                    if (c1 === void 0) { c1 = 0.1; }
+                    if (c2 === void 0) { c2 = 0.1; }
                     _super.call(this, 'PSOA');
+                    this.omega = omega;
+                    this.c1 = c1;
+                    this.c2 = c2;
                     this.fitness = fitness;
                 }
                 PSOA.prototype.execute = function (population) {
                     //assuming that is already ranked
                     var best = population.individuals[0].getValue("PSOData");
-                    var omega = 0.85;
-                    var c1 = 0.1;
-                    var c2 = 0.1;
+                    var omega = this.omega;
+                    var c1 = this.c1;
+                    var c2 = this.c2;
                     for (var i = 0; i < population.individuals.length; i++) {
                         var currentIndividual = population.individuals[i];
                         var psoData = currentIndividual.getValue("PSOData");
@@ -848,7 +854,7 @@ System.register("operators/swarm/PSOA", ["models/PopulationOperator", "models/Fi
                 };
                 PSOA = __decorate([
                     Register, 
-                    __metadata('design:paramtypes', [String])
+                    __metadata('design:paramtypes', [String, Number, Number, Number])
                 ], PSOA);
                 return PSOA;
             }(PopulationOperator_4.PopulationOperator));
@@ -1410,14 +1416,14 @@ System.register("models/fields/CSSField", ["models/FieldDef", "Num"], function(e
              [].slice.call(
              document.getElementsByTagName('section')).forEach(
              (elem) => {
-                        var id = elem.id;
-                        var values = [];
-                        cssValues[id] = values;
-                        [].slice.call(elem.getElementsByTagName('code')).forEach((codeElem) => {
-                            console.log(codeElem);
-                            values.push(codeElem.innerText);
-                        })
-                    }
+                    var id = elem.id;
+                    var values = [];
+                    cssValues[id] = values;
+                    [].slice.call(elem.getElementsByTagName('code')).forEach((codeElem) => {
+                        console.log(codeElem);
+                        values.push(codeElem.innerText);
+                    })
+                }
              )
              console.log(JSON.stringify(cssValues));
              *

@@ -11,7 +11,7 @@ export class PSOA extends PopulationOperator {
 
     private fitness:string;
 
-    constructor(fitness:string) {
+    constructor(fitness:string, private omega:number = 0.85, private c1:number = 0.1, private c2:number = 0.1) {
         super('PSOA');
         this.fitness = fitness;
     }
@@ -21,9 +21,9 @@ export class PSOA extends PopulationOperator {
         //assuming that is already ranked
         var best = population.individuals[0].getValue("PSOData");
 
-        var omega:number = 0.85;
-        var c1:number = 0.1;
-        var c2:number = 0.1;
+        var omega:number = this.omega;
+        var c1:number = this.c1;
+        var c2:number = this.c2;
 
 
         for (let i = 0; i < population.individuals.length; i++) {
