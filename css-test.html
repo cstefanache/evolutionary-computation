@@ -59,12 +59,13 @@
             application.resetPopulations();
             application.addOperator(application.createOperator('CSSDescriptor', ['htmltemplate']));
             application.addOperator(application.createOperator('Sort', ['result']));
+            application.addOperator(application.createOperator('LinearRanking', ['result']));
             application.addOperator(application.createOperator('CSSRenderer', ['htmltemplate']));
             application.addOperator(application.createOperator('TableRenderer', [populationSize,['result','sortOrder'], "CSSRenderer"]));
 
             var selectionGroupOperator = application.createOperator('GroupOperator', ["SelectionGroup", 10]);
             application.addOperator(selectionGroupOperator);
-            application.addOperator(application.createOperator('Roulette', ["sortOrder"]), selectionGroupOperator);
+            application.addOperator(application.createOperator('Roulette', ["linearRanking"]), selectionGroupOperator);
             application.addOperator(application.createOperator('CSSGAOperator', ['htmltemplate']), selectionGroupOperator);
             application.addOperator(application.createOperator('PopulationSizeControl', [populationSize]));
             /*

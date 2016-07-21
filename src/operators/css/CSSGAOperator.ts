@@ -11,11 +11,11 @@ export class CSSGAOperator extends PopulationOperator {
     tags:Array<string>;
 
     constructor(id:string,
-                private ruleAditionProbability:number = 0.4,
-                private ruleRemovalProbability:number = 0.05,
+                private ruleAditionProbability:number = 0.6,
+                private ruleRemovalProbability:number = 0.02,
                 private propertyAlterProbability:number = 0.4,
-                private propertyAdditionProbability:number = 0.2,
-                private propertyRemovalProbability:number = 0.2) {
+                private propertyAdditionProbability:number = 0.4,
+                private propertyRemovalProbability:number = 0.5) {
         super('CSSGAOperator');
         this.tags = CSSField.getTagsList(id);
     }
@@ -29,7 +29,6 @@ export class CSSGAOperator extends PopulationOperator {
 
         var parent1:Individual = selection[0];
         var parent2:Individual = selection[1];
-
 
         var parent1CSSObject:Array = parent1.getValue('css');
         var parent2CSSObject:Array = parent2.getValue('css');

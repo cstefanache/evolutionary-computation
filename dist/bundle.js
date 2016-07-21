@@ -1915,12 +1915,12 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                         var val = CSSField_1.CSSField.getFullCSSString(ind.getValue('css'));
                         this.styleElement.innerHTML = val;
                         var value = 0;
-                        value += this.alignment(document, '.content > div', true, 30);
+                        value += this.alignment(document, '.content > div', true);
                         value += this.noOverlapping(document, '.content > div');
                         value += this.noOffset(document, '.content > div');
                         value += this.fitInsideParent(document.getElementsByClassName('content')[0]);
                         [].slice.call(document.querySelectorAll('.content > div')).forEach(function (elem) {
-                            value += _this.alignment(elem, '.elem', false, 30);
+                            value += _this.alignment(elem, '.elem', false);
                             value += _this.noOverlapping(elem, '.elem');
                         });
                         if (val.length === 0) {
@@ -1933,7 +1933,7 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                     }
                 };
                 CSSDescriptor.prototype.noOffset = function (root, query, increment) {
-                    if (increment === void 0) { increment = 5; }
+                    if (increment === void 0) { increment = 0.1; }
                     var value = 0;
                     [].slice.call(root.querySelectorAll(query)).forEach(function (elem) {
                         value += Math.abs(elem.offsetLeft);
@@ -1945,10 +1945,13 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                     var parent = element.parentElement, width = parent.offsetWidth, height = parent.offsetHeight, actualWidth = element.offsetWidth + element.offsetLeft, actualHeight = element.offsetHeight + element.offsetTop;
                     value += actualWidth > width ? actualWidth - width : 0;
                     value += actualHeight > height ? actualHeight - height : 0;
+                    if (value > 0) {
+                        value = 1 - (1 / value);
+                    }
                     return value;
                 };
                 CSSDescriptor.prototype.noOverlapping = function (root, query, increment) {
-                    if (increment === void 0) { increment = 10; }
+                    if (increment === void 0) { increment = 0.1; }
                     var value = 0, arr = [].slice.call(root.querySelectorAll(query));
                     for (var i = 0; i < arr.length - 1; i++) {
                         for (var j = i + 1; j < arr.length; j++) {
@@ -1966,7 +1969,7 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                     return value;
                 };
                 CSSDescriptor.prototype.alignment = function (root, query, leftAlignment, increment) {
-                    if (increment === void 0) { increment = 5; }
+                    if (increment === void 0) { increment = 0.1; }
                     var value = 0;
                     var lastX = -1;
                     var lastY = -1;
@@ -2020,11 +2023,11 @@ System.register("operators/css/CSSGAOperator", ["models/PopulationOperator", "Nu
             CSSGAOperator = (function (_super) {
                 __extends(CSSGAOperator, _super);
                 function CSSGAOperator(id, ruleAditionProbability, ruleRemovalProbability, propertyAlterProbability, propertyAdditionProbability, propertyRemovalProbability) {
-                    if (ruleAditionProbability === void 0) { ruleAditionProbability = 0.4; }
-                    if (ruleRemovalProbability === void 0) { ruleRemovalProbability = 0.05; }
+                    if (ruleAditionProbability === void 0) { ruleAditionProbability = 0.6; }
+                    if (ruleRemovalProbability === void 0) { ruleRemovalProbability = 0.02; }
                     if (propertyAlterProbability === void 0) { propertyAlterProbability = 0.4; }
-                    if (propertyAdditionProbability === void 0) { propertyAdditionProbability = 0.2; }
-                    if (propertyRemovalProbability === void 0) { propertyRemovalProbability = 0.2; }
+                    if (propertyAdditionProbability === void 0) { propertyAdditionProbability = 0.4; }
+                    if (propertyRemovalProbability === void 0) { propertyRemovalProbability = 0.5; }
                     _super.call(this, 'CSSGAOperator');
                     this.ruleAditionProbability = ruleAditionProbability;
                     this.ruleRemovalProbability = ruleRemovalProbability;
@@ -2349,11 +2352,11 @@ System.register("operators/misc/Sort", ["models/FieldDef", "models/PopulationOpe
         }
     }
 });
-System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_32, context_32) {
+System.register("operators/objective/Rastrigin", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_32, context_32) {
     "use strict";
     var __moduleName = context_32 && context_32.id;
     var FieldDef_15, FieldDef_16, IndividualOperator_4, Num_14;
-    var Weierstrass;
+    var Rastrigin;
     return {
         setters:[
             function (FieldDef_15_1) {
@@ -2365,6 +2368,61 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
             },
             function (Num_14_1) {
                 Num_14 = Num_14_1;
+            }],
+        execute: function() {
+            Rastrigin = (function (_super) {
+                __extends(Rastrigin, _super);
+                function Rastrigin() {
+                    _super.call(this, 'Rastrigin');
+                    this.X_FIELD_NAME = 'x';
+                    this.Y_FIELD_NAME = 'y';
+                }
+                Rastrigin.prototype.execute = function (individual) {
+                    var x = individual.getValue(this.X_FIELD_NAME);
+                    var y = individual.getValue(this.Y_FIELD_NAME);
+                    var sum = 0;
+                    var obj = 20;
+                    obj += x * x - (10 * Math.cos(2 * Math.PI * x));
+                    obj += y * y - (10 * Math.cos(2 * Math.PI * y));
+                    individual.setValue(Rastrigin.OBJ_FIELD_NAME, Num_14.Num.roundToPrecision(obj, Rastrigin.PRECISION));
+                };
+                Rastrigin.prototype.getName = function () {
+                    return "Rastrigin";
+                };
+                Rastrigin.prototype.getFieldDefinition = function () {
+                    var x = new FieldDef_16.NumericField(this.X_FIELD_NAME, -5.12, 5.12, Rastrigin.PRECISION);
+                    var y = new FieldDef_16.NumericField(this.Y_FIELD_NAME, -5.12, 5.12, Rastrigin.PRECISION);
+                    var value = new FieldDef_15.OutputField(Rastrigin.OBJ_FIELD_NAME);
+                    return [x, y, value];
+                };
+                Rastrigin.OBJ_FIELD_NAME = 'rastrigin';
+                Rastrigin.PRECISION = 10;
+                Rastrigin = __decorate([
+                    Register, 
+                    __metadata('design:paramtypes', [])
+                ], Rastrigin);
+                return Rastrigin;
+            }(IndividualOperator_4.IndividualOperator));
+            exports_32("Rastrigin", Rastrigin);
+        }
+    }
+});
+System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/IndividualOperator", "Num"], function(exports_33, context_33) {
+    "use strict";
+    var __moduleName = context_33 && context_33.id;
+    var FieldDef_17, FieldDef_18, IndividualOperator_5, Num_15;
+    var Weierstrass;
+    return {
+        setters:[
+            function (FieldDef_17_1) {
+                FieldDef_17 = FieldDef_17_1;
+                FieldDef_18 = FieldDef_17_1;
+            },
+            function (IndividualOperator_5_1) {
+                IndividualOperator_5 = IndividualOperator_5_1;
+            },
+            function (Num_15_1) {
+                Num_15 = Num_15_1;
             }],
         execute: function() {
             Weierstrass = (function (_super) {
@@ -2393,15 +2451,15 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                         tmp += Math.pow(this.a, k) * Math.cos(2 * Math.PI * Math.pow(this.b, k) * (y + 0.5));
                     }
                     var value = tmp - 2 * this.constant;
-                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_14.Num.roundToPrecision(value, Weierstrass.PRECISION));
+                    individual.setValue(Weierstrass.OBJ_FIELD_NAME, Num_15.Num.roundToPrecision(value, Weierstrass.PRECISION));
                 };
                 Weierstrass.prototype.getName = function () {
                     return "Weierstrass";
                 };
                 Weierstrass.prototype.getFieldDefinition = function () {
-                    var x = new FieldDef_16.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var y = new FieldDef_16.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
-                    var value = new FieldDef_15.OutputField(Weierstrass.OBJ_FIELD_NAME);
+                    var x = new FieldDef_18.NumericField(this.X_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var y = new FieldDef_18.NumericField(this.Y_FIELD_NAME, 0, 2, Weierstrass.PRECISION);
+                    var value = new FieldDef_17.OutputField(Weierstrass.OBJ_FIELD_NAME);
                     return [x, y, value];
                 };
                 Weierstrass.OBJ_FIELD_NAME = 'weierstrass';
@@ -2411,8 +2469,8 @@ System.register("operators/objective/Weierstrass", ["models/FieldDef", "models/I
                     __metadata('design:paramtypes', [])
                 ], Weierstrass);
                 return Weierstrass;
-            }(IndividualOperator_4.IndividualOperator));
-            exports_32("Weierstrass", Weierstrass);
+            }(IndividualOperator_5.IndividualOperator));
+            exports_33("Weierstrass", Weierstrass);
         }
     }
 });

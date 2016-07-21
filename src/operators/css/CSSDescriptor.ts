@@ -31,13 +31,13 @@ export class CSSDescriptor extends IndividualOperator {
             this.styleElement.innerHTML = val;
             var value = 0;
 
-            value += this.alignment(document, '.content > div', true, 30);
+            value += this.alignment(document, '.content > div', true);
             value += this.noOverlapping(document, '.content > div');
             value += this.noOffset(document, '.content > div');
             value += this.fitInsideParent(document.getElementsByClassName('content')[0]);
 
             [].slice.call(document.querySelectorAll('.content > div')).forEach(elem=> {
-                value += this.alignment(elem, '.elem', false, 30);
+                value += this.alignment(elem, '.elem', false);
                 value += this.noOverlapping(elem, '.elem');
             });
 
@@ -52,7 +52,7 @@ export class CSSDescriptor extends IndividualOperator {
         }
     }
 
-    noOffset(root:any, query:String, increment:number = 5):number {
+    noOffset(root:any, query:String, increment:number = 0.1):number {
         var value = 0;
         [].slice.call(root.querySelectorAll(query)).forEach(elem=> {
             value += Math.abs(elem.offsetLeft);
@@ -75,10 +75,14 @@ export class CSSDescriptor extends IndividualOperator {
         value += actualWidth > width ? actualWidth - width : 0;
         value += actualHeight > height ? actualHeight - height : 0;
 
+        if (value > 0) {
+            value = 1 - (1 / value);
+        }
+
         return value;
     }
 
-    noOverlapping(root:any, query:String, increment:number = 10):number {
+    noOverlapping(root:any, query:String, increment:number = 0.1):number {
         var value = 0,
             arr = [].slice.call(root.querySelectorAll(query));
         for (var i = 0; i < arr.length - 1; i++) {
@@ -99,7 +103,7 @@ export class CSSDescriptor extends IndividualOperator {
         return value;
     }
 
-    alignment(root:any, query:String, leftAlignment:boolean, increment:number = 5):number {
+    alignment(root:any, query:String, leftAlignment:boolean, increment:number = 0.1):number {
         var value = 0;
         var lastX = -1;
         var lastY = -1;
