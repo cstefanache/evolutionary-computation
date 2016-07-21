@@ -81,7 +81,7 @@ export class CSSField extends FieldDef {
     }
 
     static getCSSValueForProp(prop:string):string {
-        return CSSField.parseValue(prop);
+        return CSSField.parseValue(CSSField.CSSOptions[prop]);
     }
 
 
@@ -106,7 +106,7 @@ export class CSSField extends FieldDef {
                         break;
                     case "length":
                     case "integer":
-                        final += Num.randomInt(-1028, 1028);
+                        final += Num.randomInt(-1028, 1028) + "px";
                         break;
                     case "time":
                         final += Num.roundToPrecision(Num.getRandomNum(0, 2), 2) + "s";
@@ -283,7 +283,7 @@ export class CSSField extends FieldDef {
         "hyphens": ["manual", "none", "auto"],
         "image-rendering": ["auto", "pixelated", "crisp-edges"],
         "image-resolution": ["1dppx", "snap", "from-image"],
-        "image-orientation": ["0deg", "from-image", "<angle> flip", "<angle>"],
+        //"image-orientation": ["0deg", "from-image", "<angle> flip", "<angle>"],
         "isolation": ["auto", "isolate"],
         "letter-spacing": ["normal", "<length>"],
         "line-break": ["auto", "strict", "normal", "loose"],

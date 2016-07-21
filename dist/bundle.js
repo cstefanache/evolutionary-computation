@@ -916,9 +916,10 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
         execute: function() {
             TableRenderer = (function (_super) {
                 __extends(TableRenderer, _super);
-                function TableRenderer(maxRows, cols) {
+                function TableRenderer(maxRows, cols, executeOnClick) {
                     _super.call(this, "Table View");
                     this.cols = cols;
+                    this.executeOnClick = executeOnClick;
                     this.maxRows = maxRows;
                     if (window) {
                         this.tableElement = $('<table class="table table-striped"></table>');
@@ -939,7 +940,9 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
                         var ind = _c[_b];
                         if (this.maxRows !== undefined && index++ > this.maxRows)
                             break;
-                        htmlContent += '<tr><td style="background-color:' + population.color + '">&nbsp;</td>';
+                        htmlContent += '<tr' +
+                            this.executeOnClick ? ' click="' + this.executeOnClick + '"' : ''
+                            + '><td style="background-color:' + population.color + '">&nbsp;</td>';
                         for (var _d = 0, _e = this.cols ? this.cols : population.fields; _d < _e.length; _d++) {
                             var field = _e[_d];
                             htmlContent += '<td>' + JSON.stringify(ind.getValue(field)) + '</td>';
@@ -959,7 +962,7 @@ System.register("operators/renderers/TableRenderer", ["models/PopulationOperator
                 };
                 TableRenderer = __decorate([
                     Register, 
-                    __metadata('design:paramtypes', [Number, Array])
+                    __metadata('design:paramtypes', [Number, Array, String])
                 ], TableRenderer);
                 return TableRenderer;
             }(PopulationOperator_6.PopulationOperator));
@@ -1465,7 +1468,7 @@ System.register("models/fields/CSSField", ["models/FieldDef", "Num"], function(e
                     return cssRule;
                 };
                 CSSField.getCSSValueForProp = function (prop) {
-                    return CSSField.parseValue(prop);
+                    return CSSField.parseValue(CSSField.CSSOptions[prop]);
                 };
                 CSSField.parseValue = function (value) {
                     var final = "", isTag = false, lastIndex = 0;
@@ -1486,7 +1489,7 @@ System.register("models/fields/CSSField", ["models/FieldDef", "Num"], function(e
                                     break;
                                 case "length":
                                 case "integer":
-                                    final += Num_9.Num.randomInt(-1028, 1028);
+                                    final += Num_9.Num.randomInt(-1028, 1028) + "px";
                                     break;
                                 case "time":
                                     final += Num_9.Num.roundToPrecision(Num_9.Num.getRandomNum(0, 2), 2) + "s";
@@ -1655,7 +1658,7 @@ System.register("models/fields/CSSField", ["models/FieldDef", "Num"], function(e
                     "hyphens": ["manual", "none", "auto"],
                     "image-rendering": ["auto", "pixelated", "crisp-edges"],
                     "image-resolution": ["1dppx", "snap", "from-image"],
-                    "image-orientation": ["0deg", "from-image", "<angle> flip", "<angle>"],
+                    //"image-orientation": ["0deg", "from-image", "<angle> flip", "<angle>"],
                     "isolation": ["auto", "isolate"],
                     "letter-spacing": ["normal", "<length>"],
                     "line-break": ["auto", "strict", "normal", "loose"],
@@ -1912,13 +1915,20 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                         var val = CSSField_1.CSSField.getFullCSSString(ind.getValue('css'));
                         this.styleElement.innerHTML = val;
                         var value = 0;
-                        value += this.alignment(document, '.content > div', true);
+                        value += this.alignment(document, '.content > div', true, 30);
+                        value += this.noOverlapping(document, '.content > div');
                         value += this.noOffset(document, '.content > div');
                         value += this.fitInsideParent(document.getElementsByClassName('content')[0]);
                         [].slice.call(document.querySelectorAll('.content > div')).forEach(function (elem) {
-                            value += _this.alignment(elem, '.elem', false, 10);
+                            value += _this.alignment(elem, '.elem', false, 30);
+                            value += _this.noOverlapping(elem, '.elem');
                         });
-                        value += 1 - 1 / val.length;
+                        if (val.length === 0) {
+                            value = 1e10;
+                        }
+                        else {
+                            value += 1 - 1 / val.length;
+                        }
                         ind.setValue("result", value);
                     }
                 };
@@ -1937,6 +1947,24 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                     value += actualHeight > height ? actualHeight - height : 0;
                     return value;
                 };
+                CSSDescriptor.prototype.noOverlapping = function (root, query, increment) {
+                    if (increment === void 0) { increment = 10; }
+                    var value = 0, arr = [].slice.call(root.querySelectorAll(query));
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        for (var j = i + 1; j < arr.length; j++) {
+                            var rect1 = arr[i].getBoundingClientRect();
+                            var rect2 = arr[j].getBoundingClientRect();
+                            var overlap = !(rect1.right < rect2.left ||
+                                rect1.left > rect2.right ||
+                                rect1.bottom < rect2.top ||
+                                rect1.top > rect2.bottom);
+                            if (overlap) {
+                                value += increment;
+                            }
+                        }
+                    }
+                    return value;
+                };
                 CSSDescriptor.prototype.alignment = function (root, query, leftAlignment, increment) {
                     if (increment === void 0) { increment = 5; }
                     var value = 0;
@@ -1946,11 +1974,11 @@ System.register("operators/css/CSSDescriptor", ["models/IndividualOperator", "mo
                         var clientRect = elem.getBoundingClientRect();
                         if (lastX == -1 && lastY == -1) {
                         }
-                        else if (leftAlignment && (lastX !== clientRect.left || lastY === clientRect.top)) {
-                            value += increment;
+                        else if (!leftAlignment && lastY !== clientRect.top) {
+                            value += Math.abs(clientRect.top - lastY);
                         }
-                        else if (!leftAlignment && (lastX === clientRect.left || lastY !== clientRect.top)) {
-                            value += increment;
+                        else if (leftAlignment && lastX !== clientRect.left) {
+                            value += Math.abs(clientRect.left - lastX);
                         }
                         lastX = clientRect.left;
                         lastY = clientRect.top;
@@ -1991,17 +2019,17 @@ System.register("operators/css/CSSGAOperator", ["models/PopulationOperator", "Nu
         execute: function() {
             CSSGAOperator = (function (_super) {
                 __extends(CSSGAOperator, _super);
-                function CSSGAOperator(id, ruleAditionProbability, ruleRemovalProbability, propertyAlterProbability, propertyAditionProbability, propertyRemovalProbability) {
-                    if (ruleAditionProbability === void 0) { ruleAditionProbability = 0.02; }
-                    if (ruleRemovalProbability === void 0) { ruleRemovalProbability = 0.04; }
-                    if (propertyAlterProbability === void 0) { propertyAlterProbability = 0.2; }
-                    if (propertyAditionProbability === void 0) { propertyAditionProbability = 0.2; }
+                function CSSGAOperator(id, ruleAditionProbability, ruleRemovalProbability, propertyAlterProbability, propertyAdditionProbability, propertyRemovalProbability) {
+                    if (ruleAditionProbability === void 0) { ruleAditionProbability = 0.4; }
+                    if (ruleRemovalProbability === void 0) { ruleRemovalProbability = 0.05; }
+                    if (propertyAlterProbability === void 0) { propertyAlterProbability = 0.4; }
+                    if (propertyAdditionProbability === void 0) { propertyAdditionProbability = 0.2; }
                     if (propertyRemovalProbability === void 0) { propertyRemovalProbability = 0.2; }
                     _super.call(this, 'CSSGAOperator');
                     this.ruleAditionProbability = ruleAditionProbability;
                     this.ruleRemovalProbability = ruleRemovalProbability;
                     this.propertyAlterProbability = propertyAlterProbability;
-                    this.propertyAditionProbability = propertyAditionProbability;
+                    this.propertyAdditionProbability = propertyAdditionProbability;
                     this.propertyRemovalProbability = propertyRemovalProbability;
                     this.tags = CSSField_2.CSSField.getTagsList(id);
                 }
@@ -2022,6 +2050,7 @@ System.register("operators/css/CSSGAOperator", ["models/PopulationOperator", "Nu
                     }
                     //console.log(CSSField.getFullCSSString(parent1CSSObject));
                     this.mutate(parent1CSSObject);
+                    this.mutate(parent2CSSObject);
                     //console.log(CSSField.getFullCSSString(parent1CSSObject));
                     child1.setValue('css', parent1CSSObject);
                     child2.setValue('css', parent2CSSObject);
@@ -2030,32 +2059,42 @@ System.register("operators/css/CSSGAOperator", ["models/PopulationOperator", "Nu
                     //console.log("------");
                 };
                 CSSGAOperator.prototype.mutate = function (properties) {
-                    if (Num_12.Num.getRandomNum() < this.ruleAditionProbability) {
-                        properties.push(CSSField_2.CSSField.buildSingleCSS(this.tags));
-                    }
-                    else {
+                    try {
+                        if (properties.length === 0 || Num_12.Num.getRandomNum() < this.ruleAditionProbability) {
+                            properties.push(CSSField_2.CSSField.buildSingleCSS(this.tags));
+                            return;
+                        }
                         var selectedRule = Num_12.Num.randomInt(0, properties.length - 1);
-                        if (Num_12.Num.getRandomNum() < this.ruleRemovalProbability && properties.length > 1) {
+                        var defs = properties[selectedRule].def;
+                        var selectedProp = Num_12.Num.randomInt(0, defs.length - 1);
+                        if (defs.length === 0 || Num_12.Num.getRandomNum() < this.ruleRemovalProbability && properties.length > 1) {
                             properties.splice(selectedRule, 1);
                         }
-                        else {
-                            try {
-                                var defs = properties[selectedRule].def;
-                                var selectedProp = Num_12.Num.randomInt(0, defs.length - 1);
-                                if (Num_12.Num.getRandomNum() < this.propertyAlterProbability) {
-                                    defs[selectedProp].value = CSSField_2.CSSField.getCSSValueForProp(defs[selectedProp].property);
-                                }
-                                else if (Num_12.Num.getRandomNum() < this.propertyAditionProbability) {
-                                    defs.push(CSSField_2.CSSField.getSingleCSSRule());
-                                }
-                                else if (Num_12.Num.getRandomNum() < this.propertyRemovalProbability) {
-                                    defs.splice(selectedProp, 1);
+                        if (Num_12.Num.getRandomNum() < this.propertyAlterProbability) {
+                            defs[selectedProp].value = CSSField_2.CSSField.getCSSValueForProp(defs[selectedProp].property);
+                        }
+                        if (Num_12.Num.getRandomNum() < this.propertyAdditionProbability) {
+                            var rule = CSSField_2.CSSField.getSingleCSSRule();
+                            var found;
+                            for (var i = 0; i < defs.length; i++) {
+                                if (defs[i].property === rule.property) {
+                                    found = defs[i];
+                                    break;
                                 }
                             }
-                            catch (e) {
-                                console.log(defs, selectedRule, selectedProp);
+                            if (found) {
+                                found.value = rule.value;
+                            }
+                            else {
+                                defs.push(rule);
                             }
                         }
+                        if (Num_12.Num.getRandomNum() < this.propertyRemovalProbability) {
+                            defs.splice(selectedProp, 1);
+                        }
+                    }
+                    catch (e) {
+                        console.log(properties, defs, selectedRule, selectedProp);
                     }
                 };
                 CSSGAOperator.prototype.getCSSString = function (arr) {
@@ -2281,7 +2320,15 @@ System.register("operators/misc/Sort", ["models/FieldDef", "models/PopulationOpe
                 Sort.prototype.execute = function (population) {
                     var _this = this;
                     population.individuals.sort(function (a, b) {
-                        var val = a.getValue(_this.field) > b.getValue(_this.field) ? -1 : 1;
+                        var value1 = a.getValue(_this.field);
+                        var value2 = b.getValue(_this.field);
+                        var val;
+                        if (value1 === value2) {
+                            val = 0;
+                        }
+                        else {
+                            val = value1 > value2 ? -1 : 1;
+                        }
                         return _this.desc ? val : -val;
                     });
                     for (var i = 0; i < population.individuals.length; i++) {

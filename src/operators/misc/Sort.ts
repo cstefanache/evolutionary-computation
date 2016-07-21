@@ -19,7 +19,14 @@ export class Sort extends PopulationOperator {
 
     execute(population:Population):void {
         population.individuals.sort((a:Individual, b:Individual)=> {
-            var val = a.getValue(this.field) > b.getValue(this.field) ? -1 : 1;
+            var value1 = a.getValue(this.field);
+            var value2 = b.getValue(this.field);
+            var val;
+            if (value1 === value2) {
+                val = 0;
+            } else {
+                val = value1 > value2 ? -1 : 1;
+            }
             return this.desc ? val : -val;
         });
 

@@ -11,10 +11,10 @@ export class CSSGAOperator extends PopulationOperator {
     tags:Array<string>;
 
     constructor(id:string,
-                private ruleAditionProbability:number = 0.02,
-                private ruleRemovalProbability:number = 0.04,
-                private propertyAlterProbability:number = 0.2,
-                private propertyAditionProbability:number = 0.2,
+                private ruleAditionProbability:number = 0.4,
+                private ruleRemovalProbability:number = 0.05,
+                private propertyAlterProbability:number = 0.4,
+                private propertyAdditionProbability:number = 0.2,
                 private propertyRemovalProbability:number = 0.2) {
         super('CSSGAOperator');
         this.tags = CSSField.getTagsList(id);
@@ -47,6 +47,7 @@ export class CSSGAOperator extends PopulationOperator {
 
         //console.log(CSSField.getFullCSSString(parent1CSSObject));
         this.mutate(parent1CSSObject);
+        this.mutate(parent2CSSObject);
         //console.log(CSSField.getFullCSSString(parent1CSSObject));
 
         child1.setValue('css', parent1CSSObject);
@@ -58,28 +59,50 @@ export class CSSGAOperator extends PopulationOperator {
     }
 
     mutate(properties:Array) {
-        if (Num.getRandomNum() < this.ruleAditionProbability) {
-            properties.push(CSSField.buildSingleCSS(this.tags))
-        } else {
-            var selectedRule = Num.randomInt(0, properties.length - 1);
-            if (Num.getRandomNum() < this.ruleRemovalProbability && properties.length > 1) {
-                properties.splice(selectedRule, 1);
-            } else {
-                try {
-                    var defs = properties[selectedRule].def;
-                    var selectedProp = Num.randomInt(0, defs.length - 1);
-                    if (Num.getRandomNum() < this.propertyAlterProbability) {
-                        defs[selectedProp].value = CSSField.getCSSValueForProp(defs[selectedProp].property);
-                    } else if (Num.getRandomNum() < this.propertyAditionProbability) {
-                        defs.push(CSSField.getSingleCSSRule());
-                    } else if (Num.getRandomNum() < this.propertyRemovalProbability) {
-                        defs.splice(selectedProp, 1);
-                    }
-                } catch (e) {
-                    console.log(defs, selectedRule, selectedProp);
-                }
+        try {
+
+
+            if (properties.length === 0 || Num.getRandomNum() < this.ruleAditionProbability) {
+                properties.push(CSSField.buildSingleCSS(this.tags));
+                return;
             }
+
+            var selectedRule = Num.randomInt(0, properties.length - 1);
+            var defs = properties[selectedRule].def;
+            var selectedProp = Num.randomInt(0, defs.length - 1);
+
+            if (defs.length === 0 || Num.getRandomNum() < this.ruleRemovalProbability && properties.length > 1) {
+                properties.splice(selectedRule, 1);
+            }
+
+            if (Num.getRandomNum() < this.propertyAlterProbability) {
+                defs[selectedProp].value = CSSField.getCSSValueForProp(defs[selectedProp].property);
+            }
+            if (Num.getRandomNum() < this.propertyAdditionProbability) {
+                var rule = CSSField.getSingleCSSRule();
+                var found;
+                for (var i = 0; i < defs.length; i++) {
+                    if (defs[i].property === rule.property) {
+                        found = defs[i];
+                        break;
+                    }
+                }
+                if (found) {
+                    found.value = rule.value;
+                } else {
+                    defs.push(rule);
+                }
+
+            }
+            if (Num.getRandomNum() < this.propertyRemovalProbability) {
+                defs.splice(selectedProp, 1);
+            }
+
+
+        } catch (e) {
+            console.log(properties, defs, selectedRule, selectedProp);
         }
+
     }
 
     getCSSString(arr:Array<any>):string {

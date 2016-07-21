@@ -31,15 +31,22 @@ export class CSSDescriptor extends IndividualOperator {
             this.styleElement.innerHTML = val;
             var value = 0;
 
-            value += this.alignment(document, '.content > div', true);
+            value += this.alignment(document, '.content > div', true, 30);
+            value += this.noOverlapping(document, '.content > div');
             value += this.noOffset(document, '.content > div');
             value += this.fitInsideParent(document.getElementsByClassName('content')[0]);
 
             [].slice.call(document.querySelectorAll('.content > div')).forEach(elem=> {
-                value += this.alignment(elem, '.elem', false, 10);
+                value += this.alignment(elem, '.elem', false, 30);
+                value += this.noOverlapping(elem, '.elem');
             });
 
-            value += 1 - 1 / val.length;
+            if (val.length === 0) {
+                value = 1e10;
+            } else {
+                value += 1 - 1 / val.length;
+            }
+
 
             ind.setValue("result", value);
         }
@@ -71,6 +78,26 @@ export class CSSDescriptor extends IndividualOperator {
         return value;
     }
 
+    noOverlapping(root:any, query:String, increment:number = 10):number {
+        var value = 0,
+            arr = [].slice.call(root.querySelectorAll(query));
+        for (var i = 0; i < arr.length - 1; i++) {
+            for (var j = i + 1; j < arr.length; j++) {
+                var rect1 = arr[i].getBoundingClientRect();
+                var rect2 = arr[j].getBoundingClientRect();
+                var overlap = !(rect1.right < rect2.left ||
+                rect1.left > rect2.right ||
+                rect1.bottom < rect2.top ||
+                rect1.top > rect2.bottom)
+
+                if (overlap) {
+                    value += increment;
+                }
+            }
+        }
+
+        return value;
+    }
 
     alignment(root:any, query:String, leftAlignment:boolean, increment:number = 5):number {
         var value = 0;
@@ -82,10 +109,10 @@ export class CSSDescriptor extends IndividualOperator {
 
             if (lastX == -1 && lastY == -1) {
 
-            } else if (leftAlignment && (lastX !== clientRect.left || lastY === clientRect.top)) {
-                value += increment;
-            } else if (!leftAlignment && (lastX === clientRect.left || lastY !== clientRect.top)) {
-                value += increment;
+            } else if (!leftAlignment && lastY !== clientRect.top) {
+                value += Math.abs(clientRect.top - lastY);
+            } else if (leftAlignment && lastX !== clientRect.left) {
+                value += Math.abs(clientRect.left - lastX);
             }
 
             lastX = clientRect.left;

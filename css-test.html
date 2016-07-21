@@ -60,7 +60,7 @@
             application.addOperator(application.createOperator('CSSDescriptor', ['htmltemplate']));
             application.addOperator(application.createOperator('Sort', ['result']));
             application.addOperator(application.createOperator('CSSRenderer', ['htmltemplate']));
-            application.addOperator(application.createOperator('TableRenderer', [populationSize,['result','sortOrder']]));
+            application.addOperator(application.createOperator('TableRenderer', [populationSize,['result','sortOrder'], "CSSRenderer"]));
 
             var selectionGroupOperator = application.createOperator('GroupOperator', ["SelectionGroup", 10]);
             application.addOperator(selectionGroupOperator);
