@@ -246,7 +246,7 @@ export class Application {
     }
 
     initializeHud() {
-        new GuiHud(this);
+        new GuiHud(this, this.populationSize);
     }
 
 

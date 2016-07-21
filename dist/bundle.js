@@ -439,7 +439,8 @@ System.register("hud/GuiHud", [], function(exports_10, context_10) {
         setters:[],
         execute: function() {
             GuiHud = (function () {
-                function GuiHud(app) {
+                function GuiHud(app, populationDefault) {
+                    if (populationDefault === void 0) { populationDefault = 100; }
                     if (!window) {
                         throw new Error("Window object is missing. Not in a browser environment?");
                     }
@@ -493,7 +494,7 @@ System.register("hud/GuiHud", [], function(exports_10, context_10) {
                     });
                     stop.style.display = "none";
                     var populationNumber = window.document.createElement('input');
-                    populationNumber.value = "100";
+                    populationNumber.value = populationDefault + "";
                     populationNumber.style.width = "50px";
                     var addPop = this.addButton(root, "+ Population", function () {
                         app.addPopulation(parseInt(populationNumber.value));
@@ -1359,7 +1360,7 @@ System.register("Application", ["models/Population", "models/GroupOperator", "mo
                     return op;
                 };
                 Application.prototype.initializeHud = function () {
-                    new GuiHud_1.GuiHud(this);
+                    new GuiHud_1.GuiHud(this, this.populationSize);
                 };
                 return Application;
             }());

@@ -3,7 +3,7 @@ export class GuiHud {
 
     app:Application;
 
-    constructor(app:Application) {
+    constructor(app:Application, populationDefault:number = 100) {
 
         if (!window) {
             throw new Error("Window object is missing. Not in a browser environment?");
@@ -73,7 +73,7 @@ export class GuiHud {
         stop.style.display = "none";
 
         var populationNumber:HTMLInputElement = window.document.createElement('input');
-        populationNumber.value = "100";
+        populationNumber.value = populationDefault+"";
         populationNumber.style.width = "50px";
 
         var addPop:HTMLElement = this.addButton(root, "+ Population", function () {
