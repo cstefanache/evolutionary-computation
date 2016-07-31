@@ -13,11 +13,13 @@ export class CanvasRenderer extends PopulationOperator {
     private width:number = 400;
     private height:number = 300;
 
-    constructor(xfield:string, yfield:string, scale?:any) {
+    constructor(xfield:string, yfield:string, scale?:any, canvasWidth?:number, canvasHeight?:number) {
         super("Canvas View");
         this.scale = scale;
         this.xfield = xfield;
         this.yfield = yfield;
+        this.width = canvasWidth || this.width;
+        this.height = canvasWidth || this.height;
         if (window) {
             this.canvas = $('<canvas style="border:1px solid #000;" width="' + this.width + 'px" height="' + this.height + 'px"></canvas>');
             var that = this;

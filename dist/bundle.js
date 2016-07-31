@@ -633,13 +633,15 @@ System.register("operators/renderers/CanvasRenderer", ["models/PopulationOperato
         execute: function() {
             CanvasRenderer = (function (_super) {
                 __extends(CanvasRenderer, _super);
-                function CanvasRenderer(xfield, yfield, scale) {
+                function CanvasRenderer(xfield, yfield, scale, canvasWidth, canvasHeight) {
                     _super.call(this, "Canvas View");
                     this.width = 400;
                     this.height = 300;
                     this.scale = scale;
                     this.xfield = xfield;
                     this.yfield = yfield;
+                    this.width = canvasWidth || this.width;
+                    this.height = canvasWidth || this.height;
                     if (window) {
                         this.canvas = $('<canvas style="border:1px solid #000;" width="' + this.width + 'px" height="' + this.height + 'px"></canvas>');
                         var that = this;
@@ -689,7 +691,7 @@ System.register("operators/renderers/CanvasRenderer", ["models/PopulationOperato
                 };
                 CanvasRenderer = __decorate([
                     Register, 
-                    __metadata('design:paramtypes', [String, String, Object])
+                    __metadata('design:paramtypes', [String, String, Object, Number, Number])
                 ], CanvasRenderer);
                 return CanvasRenderer;
             }(PopulationOperator_2.PopulationOperator));
